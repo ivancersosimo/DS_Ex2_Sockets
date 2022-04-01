@@ -28,3 +28,6 @@ int modify_value(int key, char *value1, int value2, float value3);
 int delete_key(int key);
 int exist(int key);
 int num_items();
+int sendMessage(int socket, char *buffer, int len);
+int recvMessage(int socket, char *buffer, int len);
+ssize_t readLine(int fd, void *buffer, size_t n);
