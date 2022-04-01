@@ -1,4 +1,4 @@
-#include <mqueue.h>
+//#include <mqueue.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <sys/socket.h>
 #include "keys.h"
 
 

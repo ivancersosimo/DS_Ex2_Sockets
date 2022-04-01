@@ -3,12 +3,72 @@
 #include <stdlib.h>
 #include <errno.h>
 #include "keys.h"
-#include <mqueue.h>
+//#include <mqueue.h>
+#include <sys/socket.h>
 
 #define MAXSIZE 256
 
 
 int init(){
+    /*-------Sockets-------*/
+
+    int sd;
+    struct sockaddr_in server_addr;
+    struct hostent *hp;
+
+    sd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sd == 1) {
+        printf("Error in socket\n");
+        return -1;
+    }
+    bzero((char *)&server_addr, sizeof(server_addr));
+    hp = gethostbyname (argv[1]);
+    if (hp == NULL) {
+        printf("Error in gethostbyname\n");
+        return -1;
+    }
+
+    memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
+    server_addr.sin_family  = AF_INET;
+    server_addr.sin_port    = htons(4200);
+
+    err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
+    if (err == -1) {
+        printf("Error in connect\n");
+        return -1;
+    }
+    a = htonl(5);
+    b = htonl(2);
+    op = 0; // add
+
+    err = sendMessage(sd, (char *) &op, sizeof(char));  // envía la operacion
+    if (err == -1){
+        printf("Error seding\n");
+        return -1;
+    }
+    err = sendMessage(sd, (char *) &a, sizeof(int32_t)); // envía a
+    if (err == -1){
+        printf("Error sending\n");
+        return -1;
+    }
+    err = sendMessage(sd, (char *) &b, sizeof(int32_t)); // envíab
+    if (err == -1){
+        printf("Error sending\n");
+        return -1;
+    }
+
+    err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
+    if (err == -1){
+        printf("Error receiving\n");
+        return -1;
+    }
+
+    printf("Result is %d \n", ntohl(res));
+
+    close (sd);
+
+
+    /*-----------------Message Queue-----------------*/
      /* server message queue */
     mqd_t q_server;
 
