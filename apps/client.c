@@ -20,7 +20,7 @@ int main(int argc, char * argv[]) {
     int op = atoi(argv[1]);
     int key;
     char *value1;
-    int value2;
+    int value2; 
     float value3;
     if(op > 0 && op != 2 && op != 6 && op != 5 && op != 4){
         key = atoi(argv[2]);
