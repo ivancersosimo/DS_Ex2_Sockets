@@ -1,0 +1,1 @@
+/usr/bin/cc   -rdynamic CMakeFiles/client.dir/apps/client.c.o CMakeFiles/client.dir/src/keys.c.o  -o client  -lpthread -lrt 

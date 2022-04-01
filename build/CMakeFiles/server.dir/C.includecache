@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/keys.h
+unistd.h
+-
+sys/queue.h
+-
+
+/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/src/keys.c
+string.h
+-
+stdio.h
+-
+stdlib.h
+-
+errno.h
+-
+keys.h
+/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/src/keys.h
+mqueue.h
+-
+
