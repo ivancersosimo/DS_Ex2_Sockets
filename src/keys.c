@@ -11,15 +11,26 @@
 
 int getIP(){
     char *var;
-    var = getenv("VAR1");
+    var = getenv("IP_TUPLES");
     if (var == NULL){
         printf("Variable VAR1 not defined");
         return 0;
     }
     else
-        printf("VAR1 variable defined with value %s", var);
-    return 0;
+        return var; 
 }
+
+int getPort(){
+    char *var;
+    var = getenv("PORT_TUPLES");
+    if (var == NULL){
+        printf("Variable VAR2 not defined");
+        return 0;
+    }
+    else
+        return var; 
+}
+
 int sendMessage(int socket, char * buffer, int len)
 {
     int r;
@@ -104,18 +115,17 @@ ssize_t readLine(int fd, void *buffer, size_t n)
 int init(){
     /*-------Sockets-------*/
 
-    int sd;
+    int sd, err; 
     struct sockaddr_in server_addr;
     struct hostent *hp;
-    int op;
-
+    int op, res;
     sd = socket(AF_INET, SOCK_STREAM, 0);
     if (sd == 1) {
         printf("Error in socket\n");
         return -1;
     }
-    bzero((char *)&server_addr, sizeof(server_addr));
-    hp = gethostbyname (argv[1]);
+    bzero( (char *) &server_addr, sizeof(server_addr));
+    hp = gethostbyname (getIP());
     if (hp == NULL) {
         printf("Error in gethostbyname\n");
         return -1;
@@ -123,7 +133,7 @@ int init(){
 
     memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
     server_addr.sin_family  = AF_INET;
-    server_addr.sin_port    = htons(4200);
+    server_addr.sin_port    = htons(getPort());
 
     err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
     if (err == -1) {
@@ -137,16 +147,6 @@ int init(){
         printf("Error seding\n");
         return -1;
     }
-    err = sendMessage(sd, (char *) &a, sizeof(int32_t)); // envía a
-    if (err == -1){
-        printf("Error sending\n");
-        return -1;
-    }
-    err = sendMessage(sd, (char *) &b, sizeof(int32_t)); // envíab
-    if (err == -1){
-        printf("Error sending\n");
-        return -1;
-    }
 
     err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
     if (err == -1){
@@ -155,7 +155,7 @@ int init(){
     }
 
     close (sd);
-
+    return res; 
 
     /*-----------------Message Queue-----------------*/
      /* server message queue */
