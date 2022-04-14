@@ -13,7 +13,7 @@ int getIP(){
     char *var;
     var = getenv("IP_TUPLES");
     if (var == NULL){
-        printf("Variable VAR1 not defined");
+        printf("Variable PD_TUPLES not defined\n");
         return 0;
     }
     else
@@ -24,18 +24,16 @@ int getPort(){
     char *var;
     var = getenv("PORT_TUPLES");
     if (var == NULL){
-        printf("Variable VAR2 not defined");
+        printf("Variable PORT_TUPLES not defined\n");
         return 0;
     }
     else
         return var; 
 }
 
-int sendMessage(int socket, char * buffer, int len)
-{
+int sendMessage(int socket, char * buffer, int len){
     int r;
     int l = len;
-
 
     do {
         r = write(socket, buffer, l);
@@ -49,11 +47,9 @@ int sendMessage(int socket, char * buffer, int len)
         return(0);	/* full length has been sent */
 }
 
-int recvMessage(int socket, char *buffer, int len)
-{
+int recvMessage(int socket, char *buffer, int len){
     int r;
     int l = len;
-
 
     do {
         r = read(socket, buffer, l);
@@ -66,13 +62,11 @@ int recvMessage(int socket, char *buffer, int len)
     else
         return(0);	/* full length has been receive */
 }
-ssize_t readLine(int fd, void *buffer, size_t n)
-{
+ssize_t readLine(int fd, void *buffer, size_t n){
     ssize_t numRead;  /* num of bytes fetched by last read() */
     size_t totRead;	  /* total bytes read so far */
     char *buf;
     char ch;
-
 
     if (n <= 0 || buffer == NULL) {
         errno = EINVAL;

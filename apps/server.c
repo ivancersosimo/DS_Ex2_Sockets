@@ -72,10 +72,11 @@ int process_message(struct message_request *msg){
             }
             errno = 0;
             while ((msgcont = readdir(msgdir)) != NULL){
-                strcpy(file_to_delete_path, "");
+                /*strcpy(file_to_delete_path, "");
                 strcat(file_to_delete_path, msg_dir_name);
                 strcat(file_to_delete_path, "/");
-                strcat(file_to_delete_path, msgcont->d_name);
+                strcat(file_to_delete_path, msgcont->d_name);*/
+                sprintf(file_to_delete, "%s/%s", msg_dir_name, msgcont->d_name);
                             
                 if (msgcont->d_type == DT_REG){
                     printf("%s\n",file_to_delete_path);
@@ -161,13 +162,14 @@ int process_message(struct message_request *msg){
                     perror("Could not perform conversion\n");
                     return -1;
                 }*/
-                snprintf(KeyString, sizeof(KeyString), "%d", msg_local.key);
+                /*snprintf(KeyString, sizeof(KeyString), "%d", msg_local.key);
                 strcat(file_name, msg_dir_name);
                 strcat(file_name, "/");
-                strcat(file_name, KeyString);
+                strcat(file_name, KeyString);*/
+                sprintf(file_name, "%s/%d", msg_dir_name, msg_local.key)
                 printf("filename: %s\n",file_name);
 
-                strcpy(filecontent, "");
+                /*strcpy(filecontent, "");
                 if (snprintf(v2str, sizeof(v2str), "%d", msg_local.value2) < 0){
                     perror("Could not perform conversion\n");
                     return -1;
@@ -181,7 +183,8 @@ int process_message(struct message_request *msg){
                 strcat(filecontent, v2str);
                 strcat(filecontent, ";");
                 strcat(filecontent, v3str);
-                strcat(filecontent, ";");
+                strcat(filecontent, ";");*/
+                sprintf(filecontent, "%s;%d;%f;", msg_local.value1, msg_local.value2, msg_local.value3);
                 printf("filecontent: %s\n",filecontent);
                 if((mymsg = open(file_name, O_CREAT | O_RDWR, 0644)) == -1){
                     perror("Error opening file\n");
@@ -263,14 +266,15 @@ int process_message(struct message_request *msg){
                 return -1;
             }
             if (in_dir == 0){
-                strcpy(file_name, "");
+                /*strcpy(file_name, "");
                 if (snprintf(KeyString, sizeof(KeyString), "%d", msg_local.key) < 0){
                     perror("Could not perform conversion\n");
                     return -1;
                 }
                 strcat(file_name, msg_dir_name);
                 strcat(file_name, "/");
-                strcat(file_name, KeyString);
+                strcat(file_name, KeyString);*/
+                sprintf(file_name, "%s/%d", msg_dir_name, msg_locsal.key);
                 printf("filename: %s\n",file_name);
 
                 if((mymsg = open(file_name, O_RDONLY, 0644)) == -1){
@@ -372,17 +376,18 @@ int process_message(struct message_request *msg){
                 return -1;
             }
             if (in_dir == 0){
-                strcpy(file_name, "");
+                /*strcpy(file_name, "");
                 if (snprintf(KeyString, sizeof(KeyString), "%d", msg_local.key) < 0){
                     perror("Could not perform conversion\n");
                     return -1;
                 }
                 strcat(file_name, msg_dir_name);
                 strcat(file_name, "/");
-                strcat(file_name, KeyString);
+                strcat(file_name, KeyString);*/
+                sprintf(file_name, "%s/%d", msg_dir_name, msg_locsal.key);
                 printf("modify filename: %s\n",file_name);
 
-                strcpy(filecontent, "");
+                /*strcpy(filecontent, "");
                 if (snprintf(v2str, sizeof(v2str), "%d", msg_local.value2) < 0){
                     perror("Could not perform conversion\n");
                     return -1;
@@ -396,7 +401,8 @@ int process_message(struct message_request *msg){
                 strcat(filecontent, v2str);
                 strcat(filecontent, ";");
                 strcat(filecontent, v3str);
-                strcat(filecontent, ";");
+                strcat(filecontent, ";");*/
+                sprintf(filecontent, "%s;%d;%f;", msg_local.value1, msg_locsal.value2, msg_local.value3);
                 printf("modify filecontent: %s\n",filecontent);
                 if((msg_mod = fopen(file_name, "w")) == NULL){
                     perror("Error opening file\n");
@@ -468,10 +474,11 @@ int process_message(struct message_request *msg){
                 else {
                     in_dir = 0; //key exists
                     printf("key exists, in_dir = %d\n", in_dir);
-                    strcpy(file_to_delete_path, "");
+                    /*strcpy(file_to_delete_path, "");
                     strcat(file_to_delete_path, msg_dir_name);
                     strcat(file_to_delete_path, "/");
-                    strcat(file_to_delete_path, msgcont->d_name);
+                    strcat(file_to_delete_path, msgcont->d_name);*/
+                    sprintf(file_to_delete_path, "%s/%s", msg_dir_name, msgcont->d_name);
                     if (remove(file_to_delete_path) == -1){
                         perror("Error removign file\n");
                         return -1;
@@ -614,9 +621,9 @@ int process_message(struct message_request *msg){
 int main(void) {
 
     struct message_request mymessage;
-    struct message_response myresponse; 
+    //struct message_response myresponse;
    
-    struct mq_attr q_attr, c_attr; 
+    struct mq_attr q_attr;
     pthread_attr_t t_attr; 
     pthread_t threadId;
 
@@ -678,8 +685,8 @@ int main(void) {
             return -1;
         }
     }
- return 0;
 
+    return 0;
 }
 
 
