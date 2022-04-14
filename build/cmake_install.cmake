@@ -1,4 +1,4 @@
-# Install script for directory: /home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX
+# Install script for directory: /home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

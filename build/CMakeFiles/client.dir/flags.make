@@ -6,5 +6,5 @@ C_FLAGS =
 
 C_DEFINES = 
 
-C_INCLUDES = -I"/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/include" 
+C_INCLUDES = -I"/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/include" 
 

@@ -1,4 +1,4 @@
-/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/build/CMakeFiles/rebuild_cache.dir
-/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/build/CMakeFiles/edit_cache.dir
-/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/build/CMakeFiles/client.dir
-/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/build/CMakeFiles/server.dir
+/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/build/CMakeFiles/rebuild_cache.dir
+/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/build/CMakeFiles/edit_cache.dir
+/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/build/CMakeFiles/client.dir
+/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/build/CMakeFiles/server.dir

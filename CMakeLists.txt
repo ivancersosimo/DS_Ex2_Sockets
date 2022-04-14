@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8.11)
-project(DS_EX1_POSIX)
+project(DS_EX2_SOCKETS)
 
 INCLUDE_DIRECTORIES("include")
 

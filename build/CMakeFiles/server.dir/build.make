@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX"
+CMAKE_SOURCE_DIR = "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/build"
+CMAKE_BINARY_DIR = "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/build"
 
 # Include any dependencies generated for this target.
 include CMakeFiles/server.dir/depend.make
@@ -59,29 +59,29 @@ include CMakeFiles/server.dir/flags.make
 
 CMakeFiles/server.dir/apps/server.c.o: CMakeFiles/server.dir/flags.make
 CMakeFiles/server.dir/apps/server.c.o: ../apps/server.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/server.dir/apps/server.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/server.dir/apps/server.c.o   -c "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/apps/server.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/server.dir/apps/server.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/server.dir/apps/server.c.o   -c "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/apps/server.c"
 
 CMakeFiles/server.dir/apps/server.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/server.dir/apps/server.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/apps/server.c" > CMakeFiles/server.dir/apps/server.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/apps/server.c" > CMakeFiles/server.dir/apps/server.c.i
 
 CMakeFiles/server.dir/apps/server.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/server.dir/apps/server.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/apps/server.c" -o CMakeFiles/server.dir/apps/server.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/apps/server.c" -o CMakeFiles/server.dir/apps/server.c.s
 
 CMakeFiles/server.dir/src/keys.c.o: CMakeFiles/server.dir/flags.make
 CMakeFiles/server.dir/src/keys.c.o: ../src/keys.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/server.dir/src/keys.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/server.dir/src/keys.c.o   -c "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/src/keys.c"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/server.dir/src/keys.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/server.dir/src/keys.c.o   -c "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/src/keys.c"
 
 CMakeFiles/server.dir/src/keys.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/server.dir/src/keys.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/src/keys.c" > CMakeFiles/server.dir/src/keys.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/src/keys.c" > CMakeFiles/server.dir/src/keys.c.i
 
 CMakeFiles/server.dir/src/keys.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/server.dir/src/keys.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/src/keys.c" -o CMakeFiles/server.dir/src/keys.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/src/keys.c" -o CMakeFiles/server.dir/src/keys.c.s
 
 # Object files for target server
 server_OBJECTS = \
@@ -95,7 +95,7 @@ server: CMakeFiles/server.dir/apps/server.c.o
 server: CMakeFiles/server.dir/src/keys.c.o
 server: CMakeFiles/server.dir/build.make
 server: CMakeFiles/server.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir="/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Linking C executable server"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir="/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Linking C executable server"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/server.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -108,6 +108,6 @@ CMakeFiles/server.dir/clean:
 .PHONY : CMakeFiles/server.dir/clean
 
 CMakeFiles/server.dir/depend:
-	cd "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/build" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX" "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX" "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/build" "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/build" "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/build/CMakeFiles/server.dir/DependInfo.cmake" --color=$(COLOR)
+	cd "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/build" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets" "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets" "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/build" "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/build" "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/build/CMakeFiles/server.dir/DependInfo.cmake" --color=$(COLOR)
 .PHONY : CMakeFiles/server.dir/depend
 

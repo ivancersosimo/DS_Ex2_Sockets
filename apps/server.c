@@ -21,7 +21,7 @@ char msg_dir_name[] = "messages_dir";
 int process_message(int myop){
     struct message_request msg_local;
     
-    if (pthread_mutex_lock(&mutex_msg) != 0){
+    /*if (pthread_mutex_lock(&mutex_msg) != 0){
         perror("Error mutex_lock\n");
         return -1;
     }
@@ -34,9 +34,10 @@ int process_message(int myop){
     if (pthread_mutex_unlock(&mutex_msg) != 0){
         perror("Error mutex_unlock\n");
         return -1;
-    }
+    }*/
 
     struct message_response msgres_local;
+    int err, sd;
     DIR *msgdir;
     struct dirent * msgcont;
     char file_name[100], file_to_delete_path[50];
@@ -47,33 +48,16 @@ int process_message(int myop){
     char buff[sizeof(struct message_request)];
     char to_read_value1[50], to_read_value2[50], to_read_value3[50];
 
-    struct mq_attr c_attr;
-    c_attr.mq_maxmsg = 1;
-    c_attr.mq_msgsize = sizeof(int);
-
-    struct mq_attr get_attr;
-    get_attr.mq_maxmsg = 1;
-    get_attr.mq_msgsize = sizeof(struct message_response);
-
-    switch(msg_local.op){
+    switch(myop){
         case 0:
             /*init()*/
-            q_client = mq_open(client_name, O_CREAT|O_RDWR, 0700, &c_attr);
-            if(q_client == -1){
-                perror("Can't create client queue");
-                return -1;
-            }
             if ((msgdir = opendir(msg_dir_name)) == NULL){
                 perror("Error opening directory\n");
                 return -1;
             }
             errno = 0;
             while ((msgcont = readdir(msgdir)) != NULL){
-                /*strcpy(file_to_delete_path, "");
-                strcat(file_to_delete_path, msg_dir_name);
-                strcat(file_to_delete_path, "/");
-                strcat(file_to_delete_path, msgcont->d_name);*/
-                sprintf(file_to_delete, "%s/%s", msg_dir_name, msgcont->d_name);
+                sprintf(file_to_delete_path, "%s/%s", msg_dir_name, msgcont->d_name);
                             
                 if (msgcont->d_type == DT_REG){
                     printf("%s\n",file_to_delete_path);
@@ -97,12 +81,13 @@ int process_message(int myop){
                 return -1;
             }
             myres = 0;
-            if(mq_send(q_client, (char *) &myres, sizeof(int), 0)==-1){
-                perror("Error sending message queue\n");
+            err = sendMessage(sd, (char *) &myres, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error sending\n");
                 return -1;
             }
-            if(mq_close(q_client) == -1){
-                perror("Error closing client queue\n");
+            if(close(sd) == -1){
+                perror("Error closing socket\n");
                 return -1;
             }
 
@@ -113,9 +98,24 @@ int process_message(int myop){
             break;
         case 1:
             /*set_value() */
-            q_client = mq_open(client_name, O_CREAT|O_RDWR, 0700, &c_attr);
-            if(q_client == -1){
-                perror("Can't create client queue");
+            err = recvMessage(sd, (char *) &msg_local.key, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error receiving\n");
+                return -1;
+            }
+            /*err = recvMessage(sd, (char *) &msg_local.value1, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error receiving\n");
+                return -1;
+            }*/
+            err = recvMessage(sd, (char *) &msg_local.value2, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error receiving\n");
+                return -1;
+            }
+            err = recvMessage(sd, (char *) &msg_local.value3, sizeof(float));  // envía la operacion
+            if (err == -1){
+                printf("Error receiving\n");
                 return -1;
             }
             if ((msgdir = opendir(msg_dir_name)) == NULL){
@@ -154,33 +154,9 @@ int process_message(int myop){
                 return -1;
             }
             if (in_dir == 1){
-                strcpy(file_name, "");
-                /*if (snprintf(KeyString, sizeof(KeyString), "%d", msg_local.key) < 0){
-                    perror("Could not perform conversion\n");
-                    return -1;
-                }*/
-                /*snprintf(KeyString, sizeof(KeyString), "%d", msg_local.key);
-                strcat(file_name, msg_dir_name);
-                strcat(file_name, "/");
-                strcat(file_name, KeyString);*/
-                sprintf(file_name, "%s/%d", msg_dir_name, msg_local.key)
+                sprintf(file_name, "%s/%d", msg_dir_name, msg_local.key);
                 printf("filename: %s\n",file_name);
 
-                /*strcpy(filecontent, "");
-                if (snprintf(v2str, sizeof(v2str), "%d", msg_local.value2) < 0){
-                    perror("Could not perform conversion\n");
-                    return -1;
-                }
-                if (snprintf(v3str, sizeof(v3str), "%f", msg_local.value3) < 0){
-                    perror("Could not perform conversion\n");
-                    return -1;
-                }
-                strcat(filecontent, msg_local.value1);
-                strcat(filecontent, ";");
-                strcat(filecontent, v2str);
-                strcat(filecontent, ";");
-                strcat(filecontent, v3str);
-                strcat(filecontent, ";");*/
                 sprintf(filecontent, "%s;%d;%f;", msg_local.value1, msg_local.value2, msg_local.value3);
                 printf("filecontent: %s\n",filecontent);
                 if((mymsg = open(file_name, O_CREAT | O_RDWR, 0644)) == -1){
@@ -206,25 +182,25 @@ int process_message(int myop){
                 myres = 0;
             }
             printf("myres2: %d\n ",myres);
-            if(mq_send(q_client, (char *) &myres, sizeof(int), 0) == -1){
-                perror("mqsend");
+            err = sendMessage(sd, (char *) &myres, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error receiving\n");
                 return -1;
             }
-            if (mq_close(q_client) == -1){
-                perror("mq_close");
+            if (close(sd) == -1){
+                perror("Error closing spcket\n");
                 return -1;
             }
-            
             if(closedir(msgdir) == -1){
-                perror("closedir");
+                perror("Error closing directory\n");
                 return -1;
             }
             break;
         case 2:
             /*get_value()*/
-            q_client = mq_open(client_name, O_CREAT|O_RDWR, 0700, &get_attr);
-            if(q_client == -1){
-                perror("Can't create client queue");
+            err = recvMessage(sd, (char *) &msg_local.key, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error receiving\n");
                 return -1;
             }
             if ((msgdir = opendir(msg_dir_name)) == NULL){
@@ -263,14 +239,6 @@ int process_message(int myop){
                 return -1;
             }
             if (in_dir == 0){
-                /*strcpy(file_name, "");
-                if (snprintf(KeyString, sizeof(KeyString), "%d", msg_local.key) < 0){
-                    perror("Could not perform conversion\n");
-                    return -1;
-                }
-                strcat(file_name, msg_dir_name);
-                strcat(file_name, "/");
-                strcat(file_name, KeyString);*/
                 sprintf(file_name, "%s/%d", msg_dir_name, msg_locsal.key);
                 printf("filename: %s\n",file_name);
 
@@ -317,13 +285,24 @@ int process_message(int myop){
                     return -1;
                 }
             }
-
-            if (mq_send(q_client, (char *)  &msgres_local, sizeof(struct message_response), 0) == -1){
-                perror("Error sending message queue\n");
+            
+            /*err = sendMessage(sd, (char *) &msg_local.value1, sizeof(char));  // envía la operacion
+            if (err == -1){
+                printf("Error sending\n");
+                return -1;
+            }*/
+            err = sendMessage(sd, (char *) &msg_local.value2, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error sending\n");
                 return -1;
             }
-            if (mq_close(q_client) == -1){
-                perror("Error closing client queue\n");
+            err = sendMessage(sd, (char *) &msg_local.value3, sizeof(float));  // envía la operacion
+            if (err == -1){
+                printf("Error sending\n");
+                return -1;
+            }
+            if (close(sd) == -1){
+                perror("Error closing socket\n");
             }
             if (closedir(msgdir) == -1){
                 perror("Error closing directory\n");
@@ -332,9 +311,24 @@ int process_message(int myop){
             break;
         case 3:
             /*modify_value()*/
-            q_client = mq_open(client_name, O_CREAT|O_RDWR, 0700, &c_attr);
-            if(q_client == -1){
-                perror("Can't create client queue");
+            err = recvMessage(sd, (char *) &msg_local.key, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error receiving\n");
+                return -1;
+            }
+            /*err = recvMessage(sd, (char *) &msg_local.value1, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error receiving\n");
+                return -1;
+            }*/
+            err = recvMessage(sd, (char *) &msg_local.value2, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error receiving\n");
+                return -1;
+            }
+            err = recvMessage(sd, (char *) &msg_local.value3, sizeof(float));  // envía la operacion
+            if (err == -1){
+                printf("Error receiving\n");
                 return -1;
             }
             if ((msgdir = opendir(msg_dir_name)) == NULL){
@@ -373,33 +367,9 @@ int process_message(int myop){
                 return -1;
             }
             if (in_dir == 0){
-                /*strcpy(file_name, "");
-                if (snprintf(KeyString, sizeof(KeyString), "%d", msg_local.key) < 0){
-                    perror("Could not perform conversion\n");
-                    return -1;
-                }
-                strcat(file_name, msg_dir_name);
-                strcat(file_name, "/");
-                strcat(file_name, KeyString);*/
-                sprintf(file_name, "%s/%d", msg_dir_name, msg_locsal.key);
+                sprintf(file_name, "%s/%d", msg_dir_name, msg_local.key);
                 printf("modify filename: %s\n",file_name);
-
-                /*strcpy(filecontent, "");
-                if (snprintf(v2str, sizeof(v2str), "%d", msg_local.value2) < 0){
-                    perror("Could not perform conversion\n");
-                    return -1;
-                }
-                if (snprintf(v3str, sizeof(v3str), "%f", msg_local.value3) < 0){
-                    perror("Could not perform conversion\n");
-                    return -1;
-                }
-                strcat(filecontent, msg_local.value1);
-                strcat(filecontent, ";");
-                strcat(filecontent, v2str);
-                strcat(filecontent, ";");
-                strcat(filecontent, v3str);
-                strcat(filecontent, ";");*/
-                sprintf(filecontent, "%s;%d;%f;", msg_local.value1, msg_locsal.value2, msg_local.value3);
+                sprintf(filecontent, "%s;%d;%f;", msg_local.value1, msg_local.value2, msg_local.value3);
                 printf("modify filecontent: %s\n",filecontent);
                 if((msg_mod = fopen(file_name, "w")) == NULL){
                     perror("Error opening file\n");
@@ -423,13 +393,13 @@ int process_message(int myop){
                 }
                 myres = 0;
             }
-            
-            if(mq_send(q_client, (char *)  &myres, sizeof(int), 0) ==-1){
-                perror("mq_send");
+            err = sendMessage(sd, (char *) &myres, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error sending\n");
                 return -1;
             }
-            if (mq_close(q_client) == -1){
-                perror("Error closing client queue\n");
+            if (close(sd) == -1){
+                perror("Error closing socket\n");
                 return -1;
             }
             if (closedir(msgdir) == -1){
@@ -439,9 +409,9 @@ int process_message(int myop){
             break;
         case 4:
             /*delete_key()*/
-            q_client = mq_open(client_name, O_CREAT|O_RDWR, 0700, &c_attr);
-            if(q_client == -1){
-                perror("Can't create client queue");
+            err = recvMessage(sd, (char *) &msg_local.key, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error receiving\n");
                 return -1;
             }
             if ((msgdir = opendir(msg_dir_name)) == NULL){
@@ -471,10 +441,6 @@ int process_message(int myop){
                 else {
                     in_dir = 0; //key exists
                     printf("key exists, in_dir = %d\n", in_dir);
-                    /*strcpy(file_to_delete_path, "");
-                    strcat(file_to_delete_path, msg_dir_name);
-                    strcat(file_to_delete_path, "/");
-                    strcat(file_to_delete_path, msgcont->d_name);*/
                     sprintf(file_to_delete_path, "%s/%s", msg_dir_name, msgcont->d_name);
                     if (remove(file_to_delete_path) == -1){
                         perror("Error removign file\n");
@@ -491,24 +457,25 @@ int process_message(int myop){
                 perror("Error reading directory\n");
                 return -1;
             }
-            if(mq_send(q_client, (char *) &myres, sizeof(int), 0)== -1){
-                perror("mq_send");
+            err = sendMessage(sd, (char *) &myres, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error receiving\n");
                 return -1;
             }
-            if( mq_close(q_client) ==-1){
-                perror("mq_close");
+            if(close(sd) ==-1){
+                perror("Error closing socket\n");
                 return -1;
             }
             if( closedir(msgdir)){
-                perror("closedir");
+                perror("Error closing directory\n");
                 return -1;
             }
             break;
         case 5:
             /*exist()*/
-            q_client = mq_open(client_name, O_CREAT|O_RDWR, 0700, &c_attr);
-            if(q_client == -1){
-                perror("Can't create client queue");
+            err = recvMessage(sd, (char *) &msg_local.key, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error receiving\n");
                 return -1;
             }
             if ((msgdir = opendir(msg_dir_name)) == NULL){
@@ -549,11 +516,12 @@ int process_message(int myop){
                 perror("Error reading directory\n");
                 return -1;
             }
-           if(mq_send(q_client, (char *) &myres, sizeof(int), 0) == -1){
-                perror("mq_send");
+            err = sendMessage(sd, (char *) &myres, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error sending\n");
                 return -1;
             }
-            if(mq_close(q_client)==-1){
+            if(close(sd)==-1){
                 perror("mq_close");
                 return -1;
             }
@@ -564,11 +532,6 @@ int process_message(int myop){
             break;
         case 6:
             /*num_items*/
-            q_client = mq_open(client_name, O_CREAT|O_RDWR, 0700, &c_attr);
-            if(q_client == -1){
-                perror("Can't create client queue");
-                return -1;
-            }
             num_items = 0;
             if ((msgdir = opendir(msg_dir_name)) == NULL){
                 perror("Error opening directory\n");
@@ -594,16 +557,17 @@ int process_message(int myop){
                 return -1;
             } 
             printf("number of files: %d\n", num_items);   
-            if (mq_send(q_client, (char *) &num_items, sizeof(int), 0) == -1){
-                perror("mq_send");
+            err = sendMessage(sd, (char *) &num_items, sizeof(int));  // envía la operacion
+            if (err == -1){
+                printf("Error sending\n");
                 return -1;
             }
-            if( mq_close(q_client) == -1){
-                perror("mq_close");
+            if(close(sd) == -1){
+                perror("Error closing socket\n");
                 return -1;
             }
             if( closedir(msgdir) == -1){
-                perror("closedir");
+                perror("Error closing directory\n");
                 return -1;
             }
             break;
@@ -624,15 +588,6 @@ int main(void) {
    
     pthread_attr_t t_attr; 
     pthread_t threadId;
-
-    q_attr.mq_maxmsg = 5;
-    q_attr.mq_msgsize = sizeof(struct message_request);
-
-    q_server = mq_open(server_name, O_CREAT | O_RDONLY, 0644, &q_attr);
-    if(q_server == -1){
-        perror("Can't create server queue");
-        return -1;
-    }
 
     if (pthread_mutex_init(&mutex_msg, NULL) != 0){
         perror("Error mutex_init\n");
@@ -662,18 +617,12 @@ int main(void) {
             printf("Error receiving\n");
             return -1;
         }
-
-        if (mq_receive(q_server, (char *) &mymessage, sizeof(struct message_request), 0) == -1){
-            perror("Error receiving message queue in server.c\n");
-            return -1;
-        }
-
         
-        if (pthread_create(&threadId, &t_attr, (void *)process_message, &mymessage) != 0){
+        if (pthread_create(&threadId, &t_attr, (void *)process_message, &op) != 0){
             perror("Error creating thread\n");
             return -1;
         }
-        if (pthread_mutex_lock(&mutex_msg) != 0){
+        /*if (pthread_mutex_lock(&mutex_msg) != 0){
             perror("Error mutex_lock\n");
             return -1;
         }
@@ -687,7 +636,7 @@ int main(void) {
         if (pthread_mutex_unlock(&mutex_msg) != 0){
             perror("Error mutex_unlock\n");
             return -1;
-        }
+        }*/
     }
 
     return 0;

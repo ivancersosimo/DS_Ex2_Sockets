@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/apps/client.c" "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/build/CMakeFiles/client.dir/apps/client.c.o"
-  "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/src/keys.c" "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/build/CMakeFiles/client.dir/src/keys.c.o"
+  "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/apps/client.c" "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/build/CMakeFiles/client.dir/apps/client.c.o"
+  "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/src/keys.c" "/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/build/CMakeFiles/client.dir/src/keys.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

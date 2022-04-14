@@ -9,10 +9,18 @@
 ../include/keys.h
 unistd.h
 -
-sys/queue.h
+sys/socket.h
 -
 
-/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/src/keys.c
+/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/apps/client.c
+keys.h
+/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/apps/keys.h
+stdio.h
+-
+stdlib.h
+-
+
+/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/src/keys.c
 string.h
 -
 stdio.h
@@ -22,7 +30,13 @@ stdlib.h
 errno.h
 -
 keys.h
-/home/ivan/Documents/Universidad linux/Distributed systems/Exercise1/DS_Ex1_POSIX/src/keys.h
-mqueue.h
+/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/src/keys.h
+unistd.h
+-
+sys/socket.h
+-
+netdb.h
+-
+arpa/inet.h
 -
 
