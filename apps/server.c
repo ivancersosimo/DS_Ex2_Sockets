@@ -239,7 +239,7 @@ int process_message(int myop){
                 return -1;
             }
             if (in_dir == 0){
-                sprintf(file_name, "%s/%d", msg_dir_name, msg_locsal.key);
+                sprintf(file_name, "%s/%d", msg_dir_name, msg_local.key);
                 printf("filename: %s\n",file_name);
 
                 if((mymsg = open(file_name, O_RDONLY, 0644)) == -1){

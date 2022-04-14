@@ -11,7 +11,7 @@
 #define MAXSIZE 256
 
 
-int getIP(){
+char * getIP(){
     char *var;
     var = getenv("IP_TUPLES");
     if (var == NULL){
@@ -22,7 +22,7 @@ int getIP(){
         return var; 
 }
 
-int getPort(){
+char getPort(){
     char *var;
     var = getenv("PORT_TUPLES");
     if (var == NULL){
@@ -30,7 +30,7 @@ int getPort(){
         return 0;
     }
     else
-        return var; 
+        return *var; 
 }
 
 int sendMessage(int socket, char * buffer, int len){
@@ -199,7 +199,7 @@ int set_value(int key, char *value1, int value2, float value3){
         printf("Error sending\n");
         return -1;
     }
-    readLine(value1, buff, strlen(*value1));
+    //readLine(value1, buff, strlen(*value1));
     err = sendMessage(sd, (char *) value1, sizeof(char));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
@@ -393,7 +393,7 @@ int modify_value(int key, char *value1, int value2, float value3){
         printf("Error sending\n");
         return -1;
     }
-    readLine(value1, buff, strlen(*value1));
+    //readLine(value1, buff, strlen(value1));
     err = sendMessage(sd, (char *) value1, sizeof(char));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
