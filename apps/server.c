@@ -1,4 +1,3 @@
-//#include <mqueue.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -16,12 +15,10 @@ pthread_mutex_t mutex_msg, mymutex;
 bool message_not_copied = true;
 pthread_cond_t cond_msg;
 
-char server_name[] = "/ADD_SERVER";
-char client_name[] = "/CLIENT_ONE";
 char msg_dir_name[] = "messages_dir";
-mqd_t q_server, q_client;
 
-int process_message(struct message_request *msg){
+
+int process_message(int myop){
     struct message_request msg_local;
     
     if (pthread_mutex_lock(&mutex_msg) != 0){
@@ -621,9 +618,10 @@ int process_message(struct message_request *msg){
 int main(void) {
 
     struct message_request mymessage;
-    //struct message_response myresponse;
+    
+    int err, sd;
+    int op;
    
-    struct mq_attr q_attr;
     pthread_attr_t t_attr; 
     pthread_t threadId;
 
@@ -659,6 +657,12 @@ int main(void) {
     }
 
     while(1) {
+        err = recvMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
+        if (err == -1){
+            printf("Error receiving\n");
+            return -1;
+        }
+
         if (mq_receive(q_server, (char *) &mymessage, sizeof(struct message_request), 0) == -1){
             perror("Error receiving message queue in server.c\n");
             return -1;

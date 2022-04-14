@@ -5,6 +5,8 @@
 #include "keys.h"
 #include <unistd.h>
 #include <sys/socket.h>
+#include <netdb.h>
+#include <arpa/inet.h>
 
 #define MAXSIZE 256
 
@@ -13,7 +15,7 @@ int getIP(){
     char *var;
     var = getenv("IP_TUPLES");
     if (var == NULL){
-        printf("Variable PD_TUPLES not defined\n");
+        perror("Variable PD_TUPLES not defined\n");
         return 0;
     }
     else
@@ -24,7 +26,7 @@ int getPort(){
     char *var;
     var = getenv("PORT_TUPLES");
     if (var == NULL){
-        printf("Variable PORT_TUPLES not defined\n");
+        perror("Variable PORT_TUPLES not defined\n");
         return 0;
     }
     else
@@ -125,7 +127,7 @@ int init(){
         return -1;
     }
 
-    memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
+    memcpy(&(server_addr.sin_addr), hp->h_addr, hp->h_length);
     server_addr.sin_family  = AF_INET;
     server_addr.sin_port    = htons(getPort());
 
@@ -136,9 +138,9 @@ int init(){
     }
 
     op = 0;
-    err = sendMessage(sd, (char *) &op, sizeof(char));  // envía la operacion
+    err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
     if (err == -1){
-        printf("Error seding\n");
+        printf("Error sending\n");
         return -1;
     }
 
@@ -148,115 +150,80 @@ int init(){
         return -1;
     }
 
-    close (sd);
-    return res; 
-
-    /*-----------------Message Queue-----------------*/
-     /* server message queue */
-    mqd_t q_server;
-
-    /* client message queue */
-    mqd_t q_client;
-   
-    struct message_request msg;
-    int res;
-    struct mq_attr attr;
-    attr.mq_maxmsg = 1;
-    attr.mq_msgsize = sizeof(int);
-    printf("test0");
-    q_client = mq_open("/CLIENT_ONE", O_CREAT|O_RDONLY, 0700, &attr);
-    if(q_client == -1){
-        perror("Can't create client queue\n");
-        return -1;
-    }    
-    
-    q_server = mq_open("/ADD_SERVER", O_WRONLY);
-    if(q_server == -1){
-        perror("Can't create server queue\n");
-        return -1;
-    }    
-    printf("test1");
-
-    /* fill in request */
-    strcpy(msg.q_name, "/CLIENT_ONE");
-    msg.op = 0;
-
-    if(mq_send(q_server, (char *)  &msg, sizeof(struct message_request), 0) == -1){
-        perror("Error sending message queue\n");
+    if(close (sd) == -1){
+        perror("Error closing socket\n");
         return -1;
     }
-    if (mq_receive(q_client, (char *) &res, sizeof(int), 0) == -1){
-        perror("Error receiving message queue keys.c\n");
-        return -1;
-    }
-    if(mq_close(q_server) == -1){
-        perror("Error closing q_server\n");
-        return -1;
-    }
-    if(mq_close(q_client) == -1){
-        perror("Error closing q_client\n");
-        return -1;
-    }
-    if(mq_unlink("/CLIENT_ONE") == -1){
-        perror("Error unlinking queue\n");
-        return -1;
-    }
-    return 0;
+    return res;
 }
 
 
 
 int set_value(int key, char *value1, int value2, float value3){
-   /* don't forget error handeling" */
-    printf("set value keys\n");
-    if(strlen(value1) == 0 )
+    /*--------Sockets------------*/
+    int sd, err; 
+    struct sockaddr_in server_addr;
+    struct hostent *hp;
+    int op, res;
+    char *buff;
+    sd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sd == 1) {
+        printf("Error in socket\n");
         return -1;
+    }
+    bzero( (char *) &server_addr, sizeof(server_addr));
+    hp = gethostbyname (getIP());
+    if (hp == NULL) {
+        printf("Error in gethostbyname\n");
+        return -1;
+    }
 
-    struct message_request msg;
- 
-    mqd_t q_server;
-    mqd_t q_client;
-    /* server message queue */
-    /* client message queue */
-    int res;
-    struct mq_attr attr;
-    attr.mq_maxmsg = 1;
-    attr.mq_msgsize = sizeof(int);
-    q_client = mq_open("/CLIENT_ONE", O_CREAT|O_RDONLY, 0700, &attr);
-    if( q_client ==-1){
-        perror("mq_open");
+    memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
+    server_addr.sin_family  = AF_INET;
+    server_addr.sin_port    = htons(getPort());
+
+    err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
+    if (err == -1) {
+        printf("Error in connect\n");
         return -1;
     }
-    q_server = mq_open("/ADD_SERVER", O_WRONLY);
-    if(q_server == -1){
-        perror("mq_open");
-        return-1;
-    }
-    /* fill in request */
-    strcpy(msg.q_name, "/CLIENT_ONE");
-    msg.op = 1;
-    msg.key = key;
-    strcpy(msg.value1, value1);
-    msg.value2 = value2;
-    msg.value3 = value3;
-    if(mq_send(q_server, (char *)  &msg, sizeof(struct message_request), 0) == -1){
-        perror("Error sending message queue\n");
+
+    op = 1;
+    err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
         return -1;
     }
-    if (mq_receive(q_client, (char *) &res, sizeof(int), 0) == -1){
-        perror("Error receiving message queue keys.c\n");
+    err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
         return -1;
     }
-    if(mq_close(q_server) == -1){
-        perror("Error closing q_server\n");
+    readLine(value1, buff, strlen(*value1));
+    err = sendMessage(sd, (char *) value1, sizeof(char));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
         return -1;
     }
-    if(mq_close(q_client) == -1){
-        perror("Error closing q_client\n");
+    err = sendMessage(sd, (char *) &value2, sizeof(int));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
         return -1;
     }
-    if(mq_unlink("/CLIENT_ONE") == -1){
-        perror("Error unlinking queue\n");
+    err = sendMessage(sd, (char *) &value3, sizeof(float));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
+        return -1;
+    }
+
+    err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
+    if (err == -1){
+        printf("Error receiving\n");
+        return -1;
+    }
+
+    if(close (sd) == -1){
+        perror("Error closing socket\n");
         return -1;
     }
     return res;
@@ -264,267 +231,296 @@ int set_value(int key, char *value1, int value2, float value3){
 
 
 int get_value(int key, char *value1, int *value2, float *value3){
-          /* don't forget error handeling" */
-    struct message_request msg;
-    struct message_response msg_res;
-    printf("here1");
-    mqd_t q_server;
-    mqd_t q_client;
-    /* server message queue */
-    /* client message queue */
-    struct mq_attr attr;
-    attr.mq_maxmsg = 1;
-    attr.mq_msgsize = sizeof(struct message_response);
-    q_client = mq_open("/CLIENT_ONE", O_CREAT|O_RDONLY, 0700, &attr);
-    if(q_client == -1){
-        perror("Can't create client queue\n");
-        return -1;
-    }    
-    
-    q_server = mq_open("/ADD_SERVER", O_WRONLY);
-    if(q_server == -1){
-        perror("Can't create server queue\n");
-        return -1;
-    } 
-    /* fill in request */
-    strcpy(msg.q_name, "/CLIENT_ONE");
-    msg.op = 2;
-    msg.key = key;
-
-    if(mq_send(q_server, (char *)  &msg, sizeof(struct message_request), 0) == -1){
-        perror("Error sending message queue\n");
+    /*--------Sockets------------*/
+    int sd, err; 
+    struct sockaddr_in server_addr;
+    struct hostent *hp;
+    int op, res;
+    char *buff;
+    sd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sd == 1) {
+        printf("Error in socket\n");
         return -1;
     }
-    if (mq_receive(q_client, (char *) &msg_res, sizeof(struct message_response), 0) == -1){
-        perror("Error receiving message queue keys.c\n");
+    bzero( (char *) &server_addr, sizeof(server_addr));
+    hp = gethostbyname (getIP());
+    if (hp == NULL) {
+        printf("Error in gethostbyname\n");
         return -1;
-    }
-    if(mq_close(q_server) == -1){
-        perror("Error closing q_server\n");
-        return -1;
-    }
-    if(mq_close(q_client) == -1){
-        perror("Error closing q_client\n");
-        return -1;
-    }
-    if(mq_unlink("/CLIENT_ONE") == -1){
-        perror("Error unlinking queue\n");
-        return -1;
-    }
-  
-
-    if (msg_res.err != -1) {
-        *value2 = msg_res.value2;
-        *value3 = msg_res.value3;
-        strcpy(value1, msg_res.value1);
     }
 
-    return  msg_res.err;
+    memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
+    server_addr.sin_family  = AF_INET;
+    server_addr.sin_port    = htons(getPort());
+
+    err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
+    if (err == -1) {
+        printf("Error in connect\n");
+        return -1;
+    }
+
+    op = 2;
+    err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
+        return -1;
+    }
+    err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
+        return -1;
+    }
+
+    err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
+    if (err == -1){
+        printf("Error receiving\n");
+        return -1;
+    }
+    err = recvMessage(sd, (char *) &value1, sizeof(char));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
+        return -1;
+    }
+    err = recvMessage(sd, (char *) &value2, sizeof(int));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
+        return -1;
+    }
+    err = recvMessage(sd, (char *) &value3, sizeof(float));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
+        return -1;
+    }
+
+    if(close (sd) == -1){
+        perror("Error closing socket\n");
+        return -1;
+    }
+    return res;
 }
 
 int delete_key(int key){
-      /* don't forget error handeling" */
-    struct message_request msg;
-    int res;
- 
-    mqd_t q_server;
-    mqd_t q_client;
-    /* server message queue */
-    /* client message queue */
-    struct mq_attr attr;
-    attr.mq_maxmsg = 1;
-    attr.mq_msgsize = sizeof(int);
-    q_client = mq_open("/CLIENT_ONE", O_CREAT|O_RDONLY, 0700, &attr);
-    if(q_client == -1){
-        perror("Can't create client queue\n");
-        return -1;
-    }    
-    
-    q_server = mq_open("/ADD_SERVER", O_WRONLY);
-    if(q_server == -1){
-        perror("Can't create server queue\n");
-        return -1;
-    } 
-    /* fill in request */
-    strcpy(msg.q_name, "/CLIENT_ONE");
-    msg.op = 4;
-    msg.key = key;
-    if(mq_send(q_server, (char *)  &msg, sizeof(struct message_request), 0) == -1){
-        perror("Error sending message queue\n");
+    /*--------Sockets------------*/
+    int sd, err; 
+    struct sockaddr_in server_addr;
+    struct hostent *hp;
+    int op, res;
+    char *buff;
+    sd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sd == 1) {
+        printf("Error in socket\n");
         return -1;
     }
-    if (mq_receive(q_client, (char *) &res, sizeof(int), 0) == -1){
-        perror("Error receiving message queue keys.c\n");
+    bzero( (char *) &server_addr, sizeof(server_addr));
+    hp = gethostbyname (getIP());
+    if (hp == NULL) {
+        printf("Error in gethostbyname\n");
         return -1;
     }
-    if(mq_close(q_server) == -1){
-        perror("Error closing q_server\n");
+
+    memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
+    server_addr.sin_family  = AF_INET;
+    server_addr.sin_port    = htons(getPort());
+
+    err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
+    if (err == -1) {
+        printf("Error in connect\n");
         return -1;
     }
-    if(mq_close(q_client) == -1){
-        perror("Error closing q_client\n");
+
+    op = 4;
+    err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
         return -1;
     }
-    if(mq_unlink("/CLIENT_ONE") == -1){
-        perror("Error unlinking queue\n");
+    err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
+        return -1;
+    }
+
+    err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
+    if (err == -1){
+        printf("Error receiving\n");
+        return -1;
+    }
+
+    if(close (sd) == -1){
+        perror("Error closing socket\n");
         return -1;
     }
     return res;
 }
 
 int modify_value(int key, char *value1, int value2, float value3){
-   /* don't forget error handeling" */
+   /*--------Sockets------------*/
+    int sd, err; 
+    struct sockaddr_in server_addr;
+    struct hostent *hp;
+    int op, res;
+    char *buff;
+    sd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sd == 1) {
+        printf("Error in socket\n");
+        return -1;
+    }
+    bzero( (char *) &server_addr, sizeof(server_addr));
+    hp = gethostbyname (getIP());
+    if (hp == NULL) {
+        printf("Error in gethostbyname\n");
+        return -1;
+    }
 
-    if(strlen(value1) == 0 )
-        return -1;
+    memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
+    server_addr.sin_family  = AF_INET;
+    server_addr.sin_port    = htons(getPort());
 
-    struct message_request msg;
- 
-    mqd_t q_server;
-    mqd_t q_client;
-    /* server message queue */
-    /* client message queue */
-    int res;
-    struct mq_attr attr;
-    attr.mq_maxmsg = 1;
-    attr.mq_msgsize = sizeof(int);
-    q_client = mq_open("/CLIENT_ONE", O_CREAT|O_RDONLY, 0700, &attr);
-    if(q_client == -1){
-        perror("Can't create client queue\n");
-        return -1;
-    }    
-    
-    q_server = mq_open("/ADD_SERVER", O_WRONLY);
-    if(q_server == -1){
-        perror("Can't create server queue\n");
-        return -1;
-    } 
-    /* fill in request */
-    strcpy(msg.q_name, "/CLIENT_ONE");
-    msg.op = 3;
-    msg.key = key;
-    strcpy(msg.value1, value1);
-    msg.value2 = value2;
-    msg.value3 = value3;
-    if(mq_send(q_server, (char *)  &msg, sizeof(struct message_request), 0) == -1){
-        perror("Error sending message queue\n");
+    err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
+    if (err == -1) {
+        printf("Error in connect\n");
         return -1;
     }
-    if (mq_receive(q_client, (char *) &res, sizeof(int), 0) == -1){
-        perror("Error receiving message queue keys.c\n");
+
+    op = 3;
+    err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
         return -1;
     }
-    if(mq_close(q_server) == -1){
-        perror("Error closing q_server\n");
+    err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
         return -1;
     }
-    if(mq_close(q_client) == -1){
-        perror("Error closing q_client\n");
+    readLine(value1, buff, strlen(*value1));
+    err = sendMessage(sd, (char *) value1, sizeof(char));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
         return -1;
     }
-    if(mq_unlink("/CLIENT_ONE") == -1){
-        perror("Error unlinking queue\n");
+    err = sendMessage(sd, (char *) &value2, sizeof(int));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
+        return -1;
+    }
+    err = sendMessage(sd, (char *) &value3, sizeof(float));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
+        return -1;
+    }
+
+    err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
+    if (err == -1){
+        printf("Error receiving\n");
+        return -1;
+    }
+
+    if(close (sd) == -1){
+        perror("Error closing socket\n");
         return -1;
     }
     return res;
 }
 
 int exist(int key){
-    printf("exist\n");
+    /*--------Sockets------------*/
+    int sd, err; 
+    struct sockaddr_in server_addr;
+    struct hostent *hp;
+    int op, res;
+    char *buff;
+    sd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sd == 1) {
+        printf("Error in socket\n");
+        return -1;
+    }
+    bzero( (char *) &server_addr, sizeof(server_addr));
+    hp = gethostbyname (getIP());
+    if (hp == NULL) {
+        printf("Error in gethostbyname\n");
+        return -1;
+    }
 
-    struct message_request msg;
- 
-    mqd_t q_server;
-    mqd_t q_client;
-    /* server message queue */
-    /* client message queue */
-    int res;
-    struct mq_attr attr;
-    attr.mq_maxmsg = 1;
-    attr.mq_msgsize = sizeof(int);
-    q_client = mq_open("/CLIENT_ONE", O_CREAT|O_RDONLY, 0700, &attr);
-    if(q_client == -1){
-        perror("Can't create client queue\n");
-        return -1;
-    }    
-    
-    q_server = mq_open("/ADD_SERVER", O_WRONLY);
-    if(q_server == -1){
-        perror("Can't create server queue\n");
-        return -1;
-    } 
-    /* fill in request */
-    strcpy(msg.q_name, "/CLIENT_ONE");
-    msg.op = 5;
-    msg.key = key;
-    if(mq_send(q_server, (char *)  &msg, sizeof(struct message_request), 0) == -1){
-        perror("Error sending message queue\n");
+    memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
+    server_addr.sin_family  = AF_INET;
+    server_addr.sin_port    = htons(getPort());
+
+    err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
+    if (err == -1) {
+        printf("Error in connect\n");
         return -1;
     }
-    if (mq_receive(q_client, (char *) &res, sizeof(int), 0) == -1){
-        perror("Error receiving message queue keys.c\n");
+
+    op = 5;
+    err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
         return -1;
     }
-    if(mq_close(q_server) == -1){
-        perror("Error closing q_server\n");
+    err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
         return -1;
     }
-    if(mq_close(q_client) == -1){
-        perror("Error closing q_client\n");
+
+    err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
+    if (err == -1){
+        printf("Error receiving\n");
         return -1;
     }
-    if(mq_unlink("/CLIENT_ONE") == -1){
-        perror("Error unlinking queue\n");
+
+    if(close (sd) == -1){
+        perror("Error closing socket\n");
         return -1;
     }
     return res;
 }
 
 int num_items(){
-    /* don't forget error handeling" */
-    struct message_request msg;
-    long int res;
- 
-    mqd_t q_server;
-    mqd_t q_client;
-    /* server message queue */
-    /* client message queue */
-    struct mq_attr attr;
-    attr.mq_maxmsg = 1;
-    attr.mq_msgsize = sizeof(int);
-    q_client = mq_open("/CLIENT_ONE", O_CREAT|O_RDONLY, 0700, &attr);
-    if(q_client == -1){
-        perror("Can't create client queue\n");
-        return -1;
-    }    
-    
-    q_server = mq_open("/ADD_SERVER", O_WRONLY);
-    if(q_server == -1){
-        perror("Can't create server queue\n");
-        return -1;
-    } 
-    /* fill in request */
-    strcpy(msg.q_name, "/CLIENT_ONE");
-    msg.op = 6;
-    if(mq_send(q_server, (char *)  &msg, sizeof(struct message_request), 0) == -1){
-        perror("Error sending message queue\n");
+    /*--------Sockets------------*/
+    int sd, err; 
+    struct sockaddr_in server_addr;
+    struct hostent *hp;
+    int op, res;
+    char *buff;
+    sd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sd == 1) {
+        printf("Error in socket\n");
         return -1;
     }
-    
-    if (mq_receive(q_client, (char *) &res, sizeof(res), 0) == -1){
-        perror("Error receiving message queue keys.c\n");
+    bzero( (char *) &server_addr, sizeof(server_addr));
+    hp = gethostbyname (getIP());
+    if (hp == NULL) {
+        printf("Error in gethostbyname\n");
         return -1;
     }
-    if(mq_close(q_server) == -1){
-        perror("Error closing q_server\n");
+
+    memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
+    server_addr.sin_family  = AF_INET;
+    server_addr.sin_port    = htons(getPort());
+
+    err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
+    if (err == -1) {
+        printf("Error in connect\n");
         return -1;
     }
-    if(mq_close(q_client) == -1){
-        perror("Error closing q_client\n");
+
+    op = 6;
+    err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
         return -1;
     }
-    if(mq_unlink("/CLIENT_ONE") == -1){
-        perror("Error unlinking queue\n");
+
+    err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
+    if (err == -1){
+        printf("Error receiving\n");
+        return -1;
+    }
+
+    if(close (sd) == -1){
+        perror("Error closing socket\n");
         return -1;
     }
     return res;

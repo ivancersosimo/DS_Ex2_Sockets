@@ -1,5 +1,5 @@
 #include <unistd.h>
-#include <sys/queue.h>
+#include <sys/socket.h>
 
 #define MAXSIZE 256
 
