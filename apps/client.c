@@ -5,7 +5,7 @@
 
 int main(int argc, char * argv[]) {
     if(argc < 2){
-        printf("./client <op> <key> <value1> <value2> <value3>\n");
+        printf("IP_TUPLES=<ip> PORT_TUPLES=<port> ./client <op> <key> <value1> <value2> <value3>\n");
         printf ("op codes:\n");
         printf("\t0    init()\n");
         printf("\t1    set_value(key, value1, value2, va)\n");

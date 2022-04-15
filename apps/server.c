@@ -916,12 +916,12 @@ static bool str_to_uint16(const char *str, uint16_t *res)
   return true;
 }
 
-int main(int argc, char *argv[]) {
-
-    if(argc != 2){
+int main(void) {
+    //int argc, char *argv[]
+    /*if(argc != 2){
         printf("./server <port>\n");
         return -1;
-    }
+    }*/
 
     struct message_request mymessage;
 
@@ -939,9 +939,10 @@ int main(int argc, char *argv[]) {
     //uint16_t myport; 
     //uint16_t intport = atoi(argv[1]);
     //myport = (unsigned short int) intport;
-    uint16_t myport;
+    //uint16_t myport = *argv[1];
+    uint16_t myport = 4200;
 
-    printf("my port: %hu\n", myport);
+    // printf("my port: %hu\n", myport);
     if ((sd =  socket(AF_INET, SOCK_STREAM, 0))<0){
             printf ("SERVER: Error in socket");
             return (0);
