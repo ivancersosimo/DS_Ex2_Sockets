@@ -124,6 +124,7 @@ int init(){
     hp = gethostbyname (getIP());
     if (hp == NULL) {
         printf("Error in gethostbyname\n");
+        close(sd);
         return -1;
     }
 
@@ -134,6 +135,7 @@ int init(){
     err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
     if (err == -1) {
         printf("Error in connect\n");
+        close(sd);
         return -1;
     }
 
@@ -141,12 +143,14 @@ int init(){
     err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
 
     err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
     if (err == -1){
         printf("Error receiving\n");
+        close(sd);
         return -1;
     }
 
@@ -175,6 +179,7 @@ int set_value(int key, char *value1, int value2, float value3){
     hp = gethostbyname (getIP());
     if (hp == NULL) {
         printf("Error in gethostbyname\n");
+        close(sd);
         return -1;
     }
 
@@ -185,6 +190,7 @@ int set_value(int key, char *value1, int value2, float value3){
     err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
     if (err == -1) {
         printf("Error in connect\n");
+        close(sd);
         return -1;
     }
 
@@ -192,33 +198,39 @@ int set_value(int key, char *value1, int value2, float value3){
     err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
     err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
     //readLine(value1, buff, strlen(*value1));
     err = sendMessage(sd, (char *) value1, sizeof(char));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
     err = sendMessage(sd, (char *) &value2, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
     err = sendMessage(sd, (char *) &value3, sizeof(float));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
 
     err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
     if (err == -1){
         printf("Error receiving\n");
+        close(sd);
         return -1;
     }
 
@@ -246,6 +258,7 @@ int get_value(int key, char *value1, int *value2, float *value3){
     hp = gethostbyname (getIP());
     if (hp == NULL) {
         printf("Error in gethostbyname\n");
+        close(sd);
         return -1;
     }
 
@@ -256,6 +269,7 @@ int get_value(int key, char *value1, int *value2, float *value3){
     err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
     if (err == -1) {
         printf("Error in connect\n");
+        close(sd);
         return -1;
     }
 
@@ -263,32 +277,38 @@ int get_value(int key, char *value1, int *value2, float *value3){
     err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
     err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
 
     err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
     if (err == -1){
         printf("Error receiving\n");
+        close(sd);
         return -1;
     }
     err = recvMessage(sd, (char *) &value1, sizeof(char));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
     err = recvMessage(sd, (char *) &value2, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
     err = recvMessage(sd, (char *) &value3, sizeof(float));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
 
@@ -315,6 +335,7 @@ int delete_key(int key){
     hp = gethostbyname (getIP());
     if (hp == NULL) {
         printf("Error in gethostbyname\n");
+        close(sd);
         return -1;
     }
 
@@ -325,6 +346,7 @@ int delete_key(int key){
     err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
     if (err == -1) {
         printf("Error in connect\n");
+        close(sd);
         return -1;
     }
 
@@ -332,17 +354,20 @@ int delete_key(int key){
     err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
     err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
 
     err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
     if (err == -1){
         printf("Error receiving\n");
+        close(sd);
         return -1;
     }
 
@@ -369,6 +394,7 @@ int modify_value(int key, char *value1, int value2, float value3){
     hp = gethostbyname (getIP());
     if (hp == NULL) {
         printf("Error in gethostbyname\n");
+        close(sd);
         return -1;
     }
 
@@ -379,6 +405,7 @@ int modify_value(int key, char *value1, int value2, float value3){
     err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
     if (err == -1) {
         printf("Error in connect\n");
+        close(sd);
         return -1;
     }
 
@@ -386,38 +413,45 @@ int modify_value(int key, char *value1, int value2, float value3){
     err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
     err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
     //readLine(value1, buff, strlen(value1));
     err = sendMessage(sd, (char *) value1, sizeof(char));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
     err = sendMessage(sd, (char *) &value2, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
     err = sendMessage(sd, (char *) &value3, sizeof(float));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
 
     err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
     if (err == -1){
         printf("Error receiving\n");
+        close(sd);
         return -1;
     }
 
     if(close (sd) == -1){
         perror("Error closing socket\n");
+        close(sd);
         return -1;
     }
     return res;
@@ -439,6 +473,7 @@ int exist(int key){
     hp = gethostbyname (getIP());
     if (hp == NULL) {
         printf("Error in gethostbyname\n");
+        close(sd);
         return -1;
     }
 
@@ -449,6 +484,7 @@ int exist(int key){
     err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
     if (err == -1) {
         printf("Error in connect\n");
+        close(sd);
         return -1;
     }
 
@@ -456,17 +492,20 @@ int exist(int key){
     err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
     err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
 
     err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
     if (err == -1){
         printf("Error receiving\n");
+        close(sd);
         return -1;
     }
 
@@ -493,6 +532,7 @@ int num_items(){
     hp = gethostbyname (getIP());
     if (hp == NULL) {
         printf("Error in gethostbyname\n");
+        close(sd);
         return -1;
     }
 
@@ -503,6 +543,7 @@ int num_items(){
     err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
     if (err == -1) {
         printf("Error in connect\n");
+        close(sd);
         return -1;
     }
 
@@ -510,12 +551,14 @@ int num_items(){
     err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
+        close(sd);
         return -1;
     }
 
     err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
     if (err == -1){
         printf("Error receiving\n");
+        close(sd);
         return -1;
     }
 

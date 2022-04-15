@@ -12,23 +12,35 @@ unistd.h
 sys/socket.h
 -
 
-/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/src/keys.c
-string.h
+/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/apps/server.c
+pthread.h
 -
 stdio.h
 -
-stdlib.h
+stdbool.h
 -
 errno.h
 -
-keys.h
-/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/src/keys.h
-unistd.h
+fcntl.h
+-
+sys/stat.h
+-
+string.h
+-
+stdlib.h
+-
+dirent.h
 -
 sys/socket.h
 -
-netdb.h
+netinet/in.h
 -
 arpa/inet.h
+-
+sys/types.h
+-
+keys.h
+/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/apps/keys.h
+inttypes.h
 -
 
