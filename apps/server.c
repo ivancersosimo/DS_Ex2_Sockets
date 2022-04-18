@@ -48,7 +48,8 @@ int process_message(int myop){
     char file_name[100], file_to_delete_path[50];
     char KeyString[20], v2str[20], v3str[20];
     char filecontent[sizeof(struct message_request)];
-    int myres, mymsg, in_dir, file_cont, num_items;
+    int32_t myres;
+    int mymsg, in_dir, file_cont, num_items;
     FILE *msg_mod;
     char buff[sizeof(struct message_request)];
     char to_read_value1[50], to_read_value2[50], to_read_value3[50];
@@ -106,7 +107,7 @@ int process_message(int myop){
                 return -1;
             }
             myres = 0;
-            err = sendMessage(sc, (char *) &myres, sizeof(int));  // envía la operacion
+            err = sendMessage(sc, (char *) &myres, sizeof(int32_t));  // envía la operacion
             if (err == -1){
                 printf("Error sending\n");
                 close(sc);
@@ -140,11 +141,11 @@ int process_message(int myop){
                 pthread_exit(0);
                 return -1;
             }
-            /*err = recvMessage(sd, (char *) &msg_local.value1, sizeof(int));  // envía la operacion
+            err = readLine(sc, (char *) &msg_local.value1, sizeof(int));  // envía la operacion
             if (err == -1){
-                printf("Error receiving\n");
+                printf("Error reading line\n");
                 return -1;
-            }*/
+            }
             err = recvMessage(sc, (char *) &msg_local.value2, sizeof(int));  // envía la operacion
             if (err == -1){
                 printf("Error receiving\n");
@@ -437,11 +438,11 @@ int process_message(int myop){
                 }
             }
             
-            /*err = sendMessage(sd, (char *) &msg_local.value1, sizeof(char));  // envía la operacion
+            err = sendMessage(sd, (char *) &msg_local.value1, sizeof(char));  // envía la operacion
             if (err == -1){
                 printf("Error sending\n");
                 return -1;
-            }*/
+            }
             err = sendMessage(sc, (char *) &msg_local.value2, sizeof(int));  // envía la operacion
             if (err == -1){
                 printf("Error sending\n");
@@ -484,11 +485,11 @@ int process_message(int myop){
                 pthread_exit(0);
                 return -1;
             }
-            /*err = recvMessage(sd, (char *) &msg_local.value1, sizeof(int));  // envía la operacion
+            err = readLine(sc, (char *) &msg_local.value1, sizeof(int));  // envía la operacion
             if (err == -1){
                 printf("Error receiving\n");
                 return -1;
-            }*/
+            }
             err = recvMessage(sc, (char *) &msg_local.value2, sizeof(int));  // envía la operacion
             if (err == -1){
                 printf("Error receiving\n");
@@ -897,11 +898,6 @@ int process_message(int myop){
             return 0;
             break;
     }
-    if(close(sd) == -1){
-        perror("Error closing socket\n");
-        pthread_exit(0);
-        return -1;
-    }
     pthread_exit(0);
 }
 
@@ -916,12 +912,12 @@ static bool str_to_uint16(const char *str, uint16_t *res)
   return true;
 }
 
-int main(void) {
+int main(int argc, char *argv[]) {
     //int argc, char *argv[]
-    /*if(argc != 2){
+    if(argc != 2){
         printf("./server <port>\n");
         return -1;
-    }*/
+    }
 
     struct message_request mymessage;
 
@@ -940,9 +936,11 @@ int main(void) {
     //uint16_t intport = atoi(argv[1]);
     //myport = (unsigned short int) intport;
     //uint16_t myport = *argv[1];
-    uint16_t myport = 4200;
+    //uint16_t myport = 4200;
 
-    // printf("my port: %hu\n", myport);
+    uint16_t myport = atoi(argv[1]);
+
+    printf("my port: %s\n", argv[1]);
     if ((sd =  socket(AF_INET, SOCK_STREAM, 0))<0){
             printf ("SERVER: Error in socket");
             return (0);
@@ -998,6 +996,7 @@ int main(void) {
         close(sd);
         return -1;
     }
+    
 
     while(1) {
         printf("Waiting connection...\n");
@@ -1011,7 +1010,7 @@ int main(void) {
 		}
 		printf("Accepted connection IP: %s   Port: %d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
-        err = recvMessage(sc, (char *) &op, sizeof(int));  // envía la operacion
+        err = recvMessage(sc, (char *) &op, sizeof(char));  // envía la operacion
         if (err == -1){
             printf("Error receiving\n");
             close(sc);
@@ -1041,7 +1040,11 @@ int main(void) {
             return -1;
         }*/
     }
-
+    if(close(sd) == -1){
+        perror("Error closing socket\n");
+        pthread_exit(0);
+        return -1;
+    }
     return 0;
 }
 

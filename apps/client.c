@@ -8,7 +8,7 @@ int main(int argc, char * argv[]) {
         printf("IP_TUPLES=<ip> PORT_TUPLES=<port> ./client <op> <key> <value1> <value2> <value3>\n");
         printf ("op codes:\n");
         printf("\t0    init()\n");
-        printf("\t1    set_value(key, value1, value2, va)\n");
+        printf("\t1    set_value(key, value1, value2, value3)\n");
         printf("\t2    get_value(key, value1, value2, value3)\n");
         printf("\t3    modify_value(key, value1, value2, value3)\n");
         printf("\t4    delete_key(key)\n");
@@ -28,7 +28,7 @@ int main(int argc, char * argv[]) {
         value2 = atoi(argv[4]);
         value3 =  atof(argv[5]);
     }
-    int error;
+    int error, res;
 
     switch (op){
         case 0:
@@ -36,7 +36,8 @@ int main(int argc, char * argv[]) {
                 printf("init()");
                 return -1;
             }
-            printf("init res: %d", init());
+            res = init();
+            printf("init res: %d", res);
             break;
         case 1:
             if(argc != 6){
@@ -44,7 +45,8 @@ int main(int argc, char * argv[]) {
                  return -1;
             }
             printf("client set value\n");
-            printf(" Set value res: %d\n" ,set_value(key, value1, value2, value3));
+            res = set_value(key, value1, value2, value3);
+            printf(" Set value res: %d\n", res);
             break;
         case 2:
             if(argc != 3){
@@ -65,7 +67,8 @@ int main(int argc, char * argv[]) {
                  printf("modify_value(key, valu1, value2, value3)\n");
                  return -1;
             }
-            printf("modify res: %d\n" ,modify_value(key, value1, value2, value3));
+            res = modify_value(key, value1, value2, value3);
+            printf("modify res: %d\n", res);
             break;
         case 4:
             if (argc != 3){
@@ -73,7 +76,8 @@ int main(int argc, char * argv[]) {
               return -1;
             }
             key = atoi(argv[2]);
-            printf("delete res: %d\n",delete_key(key));
+            res = delete_key(key);
+            printf("delete res: %d\n", res);
             break;
         case 5:
             if(argc != 3){
@@ -82,14 +86,16 @@ int main(int argc, char * argv[]) {
             }
             key = atoi(argv[2]);
             printf("key: %d\n", key);
-            printf("Exist:%d\n", exist(key));
+            res = exist(key);
+            printf("Exist:%d\n", res);
             break;
         case 6:
             if(argc != 2){
                  printf("num_items()\n");
                  return -1;
             }
-            printf("number of items: %d\n", num_items());
+            res = num_items();
+            printf("number of items: %d\n", res);
             break;
         default:
             return 0;

@@ -19,10 +19,10 @@ char * getIP(){
         return 0;
     }
     else
-        return var; 
+        return var;
 }
 
-char getPort(){
+char * getPort(){
     char *var;
     var = getenv("PORT_TUPLES");
     if (var == NULL){
@@ -30,7 +30,7 @@ char getPort(){
         return 0;
     }
     else
-        return *var; 
+        return var;
 }
 
 int sendMessage(int socket, char * buffer, int len){
@@ -114,7 +114,8 @@ int init(){
     int sd, err; 
     struct sockaddr_in server_addr;
     struct hostent *hp;
-    int op, res;
+    int op;
+    int32_t res;
     sd = socket(AF_INET, SOCK_STREAM, 0);
     if (sd == 1) {
         printf("Error in socket\n");
@@ -127,10 +128,12 @@ int init(){
         close(sd);
         return -1;
     }
+    uint16_t myport = atoi(getPort());
+    printf("my port is: %d \n",myport);
 
     memcpy(&(server_addr.sin_addr), hp->h_addr, hp->h_length);
     server_addr.sin_family  = AF_INET;
-    server_addr.sin_port    = htons(getPort());
+    server_addr.sin_port    = htons(myport);
 
     err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
     if (err == -1) {
@@ -140,7 +143,7 @@ int init(){
     }
 
     op = 0;
-    err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
+    err = sendMessage(sd, (char *) &op, sizeof(char));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
@@ -182,10 +185,11 @@ int set_value(int key, char *value1, int value2, float value3){
         close(sd);
         return -1;
     }
-
+    
+    uint16_t myport = atoi(getPort());
     memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
     server_addr.sin_family  = AF_INET;
-    server_addr.sin_port    = htons(getPort());
+    server_addr.sin_port    = htons(myport);
 
     err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
     if (err == -1) {
@@ -207,7 +211,6 @@ int set_value(int key, char *value1, int value2, float value3){
         close(sd);
         return -1;
     }
-    //readLine(value1, buff, strlen(*value1));
     err = sendMessage(sd, (char *) value1, sizeof(char));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
@@ -261,10 +264,10 @@ int get_value(int key, char *value1, int *value2, float *value3){
         close(sd);
         return -1;
     }
-
+    uint16_t myport = atoi(getPort());
     memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
     server_addr.sin_family  = AF_INET;
-    server_addr.sin_port    = htons(getPort());
+    server_addr.sin_port    = htons(myport);
 
     err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
     if (err == -1) {
@@ -293,7 +296,7 @@ int get_value(int key, char *value1, int *value2, float *value3){
         close(sd);
         return -1;
     }
-    err = recvMessage(sd, (char *) &value1, sizeof(char));  // envía la operacion
+    err = readLine(sd, (char *) &value1, sizeof(char));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
@@ -338,10 +341,10 @@ int delete_key(int key){
         close(sd);
         return -1;
     }
-
+    uint16_t myport = atoi(getPort());
     memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
     server_addr.sin_family  = AF_INET;
-    server_addr.sin_port    = htons(getPort());
+    server_addr.sin_port    = htons(myport);
 
     err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
     if (err == -1) {
@@ -398,9 +401,10 @@ int modify_value(int key, char *value1, int value2, float value3){
         return -1;
     }
 
+    uint16_t myport = atoi(getPort());
     memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
     server_addr.sin_family  = AF_INET;
-    server_addr.sin_port    = htons(getPort());
+    server_addr.sin_port    = htons(myport);
 
     err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
     if (err == -1) {
@@ -422,7 +426,6 @@ int modify_value(int key, char *value1, int value2, float value3){
         close(sd);
         return -1;
     }
-    //readLine(value1, buff, strlen(value1));
     err = sendMessage(sd, (char *) value1, sizeof(char));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
@@ -477,9 +480,10 @@ int exist(int key){
         return -1;
     }
 
+    uint16_t myport = atoi(getPort());
     memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
     server_addr.sin_family  = AF_INET;
-    server_addr.sin_port    = htons(getPort());
+    server_addr.sin_port    = htons(myport);
 
     err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
     if (err == -1) {
@@ -535,10 +539,10 @@ int num_items(){
         close(sd);
         return -1;
     }
-
+    uint16_t myport = atoi(getPort());
     memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
     server_addr.sin_family  = AF_INET;
-    server_addr.sin_port    = htons(getPort());
+    server_addr.sin_port    = htons(myport);
 
     err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
     if (err == -1) {
