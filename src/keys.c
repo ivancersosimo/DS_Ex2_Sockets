@@ -114,8 +114,7 @@ int init(){
     int sd, err; 
     struct sockaddr_in server_addr;
     struct hostent *hp;
-    int op;
-    int32_t res;
+    int op, res;
     sd = socket(AF_INET, SOCK_STREAM, 0);
     if (sd == 1) {
         printf("Error in socket\n");
@@ -143,14 +142,14 @@ int init(){
     }
 
     op = 0;
-    err = sendMessage(sd, (char *) &op, sizeof(char));  // envía la operacion
+    err = sendMessage(sd, (char *) &op, sizeof(ino_t));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
         return -1;
     }
 
-    err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
+    err = recvMessage(sd, (char *) &res, sizeof(int));     // recibe la respuesta
     if (err == -1){
         printf("Error receiving\n");
         close(sd);
@@ -205,13 +204,14 @@ int set_value(int key, char *value1, int value2, float value3){
         close(sd);
         return -1;
     }
+    printf("set value key: %d\n", key);
     err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
         return -1;
     }
-    err = sendMessage(sd, (char *) value1, sizeof(char));  // envía la operacion
+    err = sendMessage(sd, (char *) value1, MAXSIZE);  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
@@ -230,7 +230,7 @@ int set_value(int key, char *value1, int value2, float value3){
         return -1;
     }
 
-    err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
+    err = recvMessage(sd, (char *) &res, sizeof(int));     // recibe la respuesta
     if (err == -1){
         printf("Error receiving\n");
         close(sd);
@@ -290,13 +290,13 @@ int get_value(int key, char *value1, int *value2, float *value3){
         return -1;
     }
 
-    err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
+    err = recvMessage(sd, (char *) &res, sizeof(int));     // recibe la respuesta
     if (err == -1){
         printf("Error receiving\n");
         close(sd);
         return -1;
     }
-    err = readLine(sd, (char *) &value1, sizeof(char));  // envía la operacion
+    err = readLine(sd, (char *) value1, MAXSIZE);  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);

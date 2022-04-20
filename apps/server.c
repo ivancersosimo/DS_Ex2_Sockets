@@ -14,6 +14,8 @@
 #include "keys.h"
 #include <inttypes.h> /* strtoimax */
 
+#define MAX_LINE 256
+
 pthread_mutex_t mutex_msg, mymutex;
 bool message_not_copied = true;
 pthread_cond_t cond_msg;
@@ -23,7 +25,7 @@ char msg_dir_name[] = "messages_dir";
 int sd, sc;
 
 
-int process_message(int myop){
+int process_message(int *myop){
     struct message_request msg_local;
     
     /*if (pthread_mutex_lock(&mutex_msg) != 0){
@@ -45,18 +47,19 @@ int process_message(int myop){
     int err, sd;
     DIR *msgdir;
     struct dirent * msgcont;
-    char file_name[100], file_to_delete_path[50];
+    char file_name[100], file_to_delete_path[300];
     char KeyString[20], v2str[20], v3str[20];
     char filecontent[sizeof(struct message_request)];
-    int32_t myres;
-    int mymsg, in_dir, file_cont, num_items;
+    int mymsg, myres, in_dir, file_cont, num_items;
     FILE *msg_mod;
     char buff[sizeof(struct message_request)];
     char to_read_value1[50], to_read_value2[50], to_read_value3[50];
 
-    switch(myop){
+    printf("myop: %d\n", *myop);
+    switch(*myop){
         case 0:
             /*init()*/
+            printf("init\n");
             if ((msgdir = opendir(msg_dir_name)) == NULL){
                 perror("Error opening directory\n");
                 close(sc);
@@ -66,20 +69,22 @@ int process_message(int myop){
             }
             errno = 0;
             while ((msgcont = readdir(msgdir)) != NULL){
-                sprintf(file_to_delete_path, "%s/%d", msg_dir_name, *msgcont->d_name);
+                printf("*msgcont->d_name: %s\n", msgcont->d_name);
+                sprintf(file_to_delete_path, "%s/%s", msg_dir_name, msgcont->d_name);
                             
                 if (msgcont->d_type == DT_REG){
                     printf("%s\n",file_to_delete_path);
                     if (pthread_mutex_lock(&mymutex) != 0){
-                        perror("Error mutex_lock\n");
+                        
                         close(sc);
                         closedir(msgdir);
                         close(sd);
                         pthread_exit(0);
+                        perror("Error mutex_lock\n");
                         return -1;
                     }
                     if (remove(file_to_delete_path) == -1){
-                        perror("Error removign file\n");
+                        perror("Error removing file\n");
                         pthread_mutex_unlock(&mymutex);
                         close(sc);
                         closedir(msgdir);
@@ -107,7 +112,7 @@ int process_message(int myop){
                 return -1;
             }
             myres = 0;
-            err = sendMessage(sc, (char *) &myres, sizeof(int32_t));  // envía la operacion
+            err = sendMessage(sc, (char *) &myres, sizeof(int));  // envía la operacion
             if (err == -1){
                 printf("Error sending\n");
                 close(sc);
@@ -116,6 +121,7 @@ int process_message(int myop){
                 pthread_exit(0);
                 return -1;
             }
+            printf("Closing sc\n");
             if(close(sc) == -1){
                 perror("Error closing socket\n");
                 closedir(msgdir);
@@ -123,7 +129,7 @@ int process_message(int myop){
                 pthread_exit(0);
                 return -1;
             }
-
+            printf("Closing msgdir\n");
             if(closedir(msgdir) == -1){
                 perror("Error closing directory\n");
                 close(sd);
@@ -133,7 +139,8 @@ int process_message(int myop){
             break;
         case 1:
             /*set_value() */
-            err = recvMessage(sc, (char *) &msg_local.key, sizeof(int));  // envía la operacion
+            err = recvMessage(sc, (char *) &msg_local.key, sizeof(int));
+            printf("Set value: %d\n", msg_local.key);
             if (err == -1){
                 printf("Error receiving\n");
                 close(sc);
@@ -141,7 +148,7 @@ int process_message(int myop){
                 pthread_exit(0);
                 return -1;
             }
-            err = readLine(sc, (char *) &msg_local.value1, sizeof(int));  // envía la operacion
+            err = readLine(sc, (char *) msg_local.value1, MAX_LINE);  // envía la operacion
             if (err == -1){
                 printf("Error reading line\n");
                 return -1;
@@ -172,15 +179,6 @@ int process_message(int myop){
             in_dir = 1;
             errno = 0;
             while ((msgcont = readdir(msgdir)) != NULL && in_dir == 1){
-                printf("Set value, mkey: %d\n", msg_local.key);
-                if (atoi(msgcont->d_name) == 0){
-                    perror("Could not perform conversion\n");
-                    close(sc);
-                    closedir(msgdir);
-                    close(sd);
-                    pthread_exit(0);
-                    return -1;
-                }
                 if (pthread_mutex_lock(&mymutex) != 0){
                     perror("Error mutex_lock\n");
                     close(sc);
@@ -438,7 +436,7 @@ int process_message(int myop){
                 }
             }
             
-            err = sendMessage(sd, (char *) &msg_local.value1, sizeof(char));  // envía la operacion
+            err = sendMessage(sd, (char *) msg_local.value1, MAX_LINE);  // envía la operacion
             if (err == -1){
                 printf("Error sending\n");
                 return -1;
@@ -485,7 +483,7 @@ int process_message(int myop){
                 pthread_exit(0);
                 return -1;
             }
-            err = readLine(sc, (char *) &msg_local.value1, sizeof(int));  // envía la operacion
+            err = readLine(sc, (char *) msg_local.value1, MAX_LINE);  // envía la operacion
             if (err == -1){
                 printf("Error receiving\n");
                 return -1;
@@ -895,9 +893,11 @@ int process_message(int myop){
             }
             break;
         default:
+            pthread_exit(0);            
             return 0;
             break;
     }
+    printf("Closing thread\n");
     pthread_exit(0);
 }
 
@@ -952,6 +952,9 @@ int main(int argc, char *argv[]) {
     	server_addr.sin_family      = AF_INET;
     	server_addr.sin_addr.s_addr = INADDR_ANY;
     	server_addr.sin_port        = htons(myport);
+
+    printf("server_addr\n: %d", ntohs(server_addr.sin_port));
+
 
     err = bind(sd, (const struct sockaddr *)&server_addr, sizeof(server_addr));
 	if (err == -1) {
@@ -1011,6 +1014,7 @@ int main(int argc, char *argv[]) {
 		printf("Accepted connection IP: %s   Port: %d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
         err = recvMessage(sc, (char *) &op, sizeof(char));  // envía la operacion
+        printf("Op: %d\n", op);
         if (err == -1){
             printf("Error receiving\n");
             close(sc);
@@ -1024,6 +1028,7 @@ int main(int argc, char *argv[]) {
             close(sd);
             return -1;
         }
+        printf("Exit thread, do loop again\n");
         /*if (pthread_mutex_lock(&mutex_msg) != 0){
             perror("Error mutex_lock\n");
             return -1;
