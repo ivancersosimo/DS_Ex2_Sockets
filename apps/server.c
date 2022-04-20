@@ -54,6 +54,7 @@ int process_message(int *myop){
     char buff[sizeof(struct message_request)];
     char to_read_value1[50], to_read_value2[50], to_read_value3[50];
     char myvalue3[50];
+    char mykey[50];
 
     printf("myop: %d\n", *myop);
     switch(*myop){
@@ -433,13 +434,17 @@ int process_message(int *myop){
             
             err = sendMessage(sd, (char *) msg_local.value1, MAX_LINE);  // envía la operacion
             if (err == -1){
-                printf("Error sending\n");
+                printf("Error sending 1\n");
+                close(sc);
+                closedir(msgdir);
+                close(sd);
+                pthread_exit(0);
                 return -1;
             }
             msg_local.value2 = htonl(msg_local.value2);
             err = sendMessage(sc, (char *) &msg_local.value2, sizeof(int32_t));  // envía la operacion
             if (err == -1){
-                printf("Error sending\n");
+                printf("Error sending 2\n");
                 close(sc);
                 closedir(msgdir);
                 close(sd);
@@ -449,7 +454,7 @@ int process_message(int *myop){
             sprintf(myvalue3, "%f", msg_local.value3);
             err = sendMessage(sc, (char *) myvalue3, 50);  // envía la operacion
             if (err == -1){
-                printf("Error sending\n");
+                printf("Error sending 3\n");
                 close(sc);
                 closedir(msgdir);
                 close(sd);
@@ -474,6 +479,7 @@ int process_message(int *myop){
             /*modify_value()*/
             err = recvMessage(sc, (char *) &msg_local.key, sizeof(int32_t));  // envía la operacion
             msg_local.key = ntohl(msg_local.key);
+            printf("Modify key: %d\n", msg_local.key);
             if (err == -1){
                 printf("Error receiving\n");
                 close(sc);
@@ -515,7 +521,8 @@ int process_message(int *myop){
             in_dir = 1;
             errno = 0;
             while (((msgcont = readdir(msgdir)) != NULL) && in_dir == 1){
-                printf("Modify value, filename: %s", msgcont->d_name);
+                printf("Modify value, filename: %s ", msgcont->d_name);
+                printf("Modify value, filename: %d\n", atoi(msgcont->d_name));
                 if (pthread_mutex_lock(&mymutex) != 0){
                     perror("Error mutex_lock\n");
                     close(sc);
@@ -524,16 +531,8 @@ int process_message(int *myop){
                     pthread_exit(0);
                     return -1;
                 }
-                if (atoi(msgcont->d_name) == 0){
-                    perror("Could not perform conversion\n");
-                    pthread_mutex_unlock(&mymutex);
-                    close(sc);
-                    closedir(msgdir);
-                    close(sd);
-                    pthread_exit(0);
-                    return -1;
-                }
-                if (atoi(msgcont->d_name) != msg_local.key){
+                sprintf(mykey, "%d", msg_local.key);
+                if (strcmp(msgcont->d_name, mykey) != 0){
                     in_dir = 1; //key doesn't exist
                     printf("key no exists, in_dir = %d\n", in_dir);
                     myres = -1;
