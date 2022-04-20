@@ -4,29 +4,20 @@
 #define MAXSIZE 256
 
 struct message_request {
-    int key;
+    int32_t key;
     char value1[MAXSIZE];
-    int  value2;
+    int32_t  value2;
     float value3;
     int op;
-    char q_name[MAXSIZE];
 };
 
-
-struct message_response {
-
-    char value1[MAXSIZE];
-    int  value2;
-    float value3;
-    int err;
-};
 
 int init();
-int set_value(int key, char *value1, int value2, float value3);
-int get_value(int key, char *value1, int *value2, float *value3);
-int modify_value(int key, char *value1, int value2, float value3);
-int delete_key(int key);
-int exist(int key);
+int set_value(int32_t key, char *value1, int32_t value2, float value3);
+int get_value(int32_t key, char *value1, int32_t *value2, float *value3);
+int modify_value(int32_t key, char *value1, int32_t value2, float value3);
+int delete_key(int32_t key);
+int exist(int32_t key);
 int num_items();
 int sendMessage(int socket, char *buffer, int len);
 int recvMessage(int socket, char *buffer, int len);

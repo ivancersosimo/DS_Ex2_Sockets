@@ -18,11 +18,11 @@ int main(int argc, char * argv[]) {
         return -1;
     }
     int op = atoi(argv[1]);
-    int key;
+    int32_t key;
     char *value1;
-    int value2; 
+    int32_t value2; 
     float value3;
-    if(op > 0 && op != 2 && op != 6 && op != 5 && op != 4){
+    if(op > 0 && op != 2 && op != 6 && op != 5 && op != 4 && op < 7){
         key = atoi(argv[2]);
         value1 = argv[3];
         value2 = atoi(argv[4]);
@@ -98,6 +98,15 @@ int main(int argc, char * argv[]) {
             printf("number of items: %d\n", res);
             break;
         default:
+            printf("IP_TUPLES=<ip> PORT_TUPLES=<port> ./client <op> <key> <value1> <value2> <value3>\n");
+            printf ("op codes:\n");
+            printf("\t0    init()\n");
+            printf("\t1    set_value(key, value1, value2, value3)\n");
+            printf("\t2    get_value(key, value1, value2, value3)\n");
+            printf("\t3    modify_value(key, value1, value2, value3)\n");
+            printf("\t4    delete_key(key)\n");
+            printf("\t5    exist(key)\n");
+            printf("\t6    num_items()\n");
             return 0;
             break;
     }

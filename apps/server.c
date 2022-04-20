@@ -43,7 +43,6 @@ int process_message(int *myop){
         return -1;
     }*/
 
-    struct message_response msgres_local;
     int err, sd;
     DIR *msgdir;
     struct dirent * msgcont;
@@ -54,6 +53,7 @@ int process_message(int *myop){
     FILE *msg_mod;
     char buff[sizeof(struct message_request)];
     char to_read_value1[50], to_read_value2[50], to_read_value3[50];
+    char myvalue3[50];
 
     printf("myop: %d\n", *myop);
     switch(*myop){
@@ -139,7 +139,8 @@ int process_message(int *myop){
             break;
         case 1:
             /*set_value() */
-            err = recvMessage(sc, (char *) &msg_local.key, sizeof(int));
+            err = recvMessage(sc, (char *) &msg_local.key, sizeof(int32_t));
+            msg_local.key = ntohl(msg_local.key);
             printf("Set value: %d\n", msg_local.key);
             if (err == -1){
                 printf("Error receiving\n");
@@ -153,7 +154,8 @@ int process_message(int *myop){
                 printf("Error reading line\n");
                 return -1;
             }
-            err = recvMessage(sc, (char *) &msg_local.value2, sizeof(int));  // envía la operacion
+            err = recvMessage(sc, (char *) &msg_local.value2, sizeof(int32_t));  // envía la operacion
+            msg_local.value2 = ntohl(msg_local.value2);
             if (err == -1){
                 printf("Error receiving\n");
                 close(sc);
@@ -161,7 +163,8 @@ int process_message(int *myop){
                 pthread_exit(0);
                 return -1;
             }
-            err = recvMessage(sc, (char *) &msg_local.value3, sizeof(float));  // envía la operacion
+            err = readLine(sc, (char *) myvalue3, 50);  // envía la operacion
+            msg_local.value3 = atof(myvalue3);
             if (err == -1){
                 printf("Error receiving\n");
                 close(sc);
@@ -291,7 +294,8 @@ int process_message(int *myop){
             break;
         case 2:
             /*get_value()*/
-            err = recvMessage(sc, (char *) &msg_local.key, sizeof(int));  // envía la operacion
+            err = recvMessage(sc, (char *) &msg_local.key, sizeof(int32_t));  // envía la operacion
+            msg_local.key = ntohl(msg_local.key);
             if (err == -1){
                 printf("Error receiving\n");
                 close(sc);
@@ -319,19 +323,10 @@ int process_message(int *myop){
                     pthread_exit(0);
                     return -1;
                 }
-                if(atoi(msgcont->d_name) == 0){
-                    perror("Could not perform conversion\n");
-                    pthread_mutex_unlock(&mymutex);
-                    close(sc);
-                    closedir(msgdir);
-                    close(sd);
-                    pthread_exit(0);
-                    return -1;
-                }
                 if (atoi(msgcont->d_name) != msg_local.key){
                     in_dir = 1; //key doesn't exist
                     printf("key no exists, in_dir = %d\n", in_dir);
-                    msgres_local.err = -1;
+                    myres = -1;
                 }
                 else {
                     in_dir = 0; //key exists
@@ -399,8 +394,8 @@ int process_message(int *myop){
                 char *strtrunc = strtok(filecontent, ";");
                 printf("strtrunc: %s\n", strtrunc);
                 printf("srtok done\n");
-                strcpy(msgres_local.value1, (char*)strtrunc);
-                printf("Value1: %s\n", msgres_local.value1);
+                strcpy(msg_local.value1, (char*)strtrunc);
+                printf("Value1: %s\n", msg_local.value1);
                 strtrunc = strtok(NULL, ";");
                 if (atoi(strtrunc) == 0){
                     perror("Could not perform conversion\n");
@@ -411,8 +406,8 @@ int process_message(int *myop){
                     pthread_exit(0);
                     return -1;
                 }
-                msgres_local.value2 = atoi(strtrunc);
-                printf("Value2: %d\n", msgres_local.value2);
+                msg_local.value2 = atoi(strtrunc);
+                printf("Value2: %d\n", msg_local.value2);
                 strtrunc = strtok(NULL, ";");
                 if (atof(strtrunc) == 0.0){
                     perror("Could not perform conversion\n");
@@ -423,9 +418,9 @@ int process_message(int *myop){
                     pthread_exit(0);
                     return -1;
                 }
-                msgres_local.value3 = (float)atof(strtrunc);
-                printf("Value3: %f\n", msgres_local.value3);
-                msgres_local.err = 0;
+                msg_local.value3 = (float)atof(strtrunc);
+                printf("Value3: %f\n", msg_local.value3);
+                myres = 0;
                 if (close(mymsg) == -1){
                     perror("Error closing file\n");
                     close(sc);
@@ -441,7 +436,8 @@ int process_message(int *myop){
                 printf("Error sending\n");
                 return -1;
             }
-            err = sendMessage(sc, (char *) &msg_local.value2, sizeof(int));  // envía la operacion
+            msg_local.value2 = htonl(msg_local.value2);
+            err = sendMessage(sc, (char *) &msg_local.value2, sizeof(int32_t));  // envía la operacion
             if (err == -1){
                 printf("Error sending\n");
                 close(sc);
@@ -450,7 +446,8 @@ int process_message(int *myop){
                 pthread_exit(0);
                 return -1;
             }
-            err = sendMessage(sc, (char *) &msg_local.value3, sizeof(float));  // envía la operacion
+            sprintf(myvalue3, "%f", msg_local.value3);
+            err = sendMessage(sc, (char *) myvalue3, 50);  // envía la operacion
             if (err == -1){
                 printf("Error sending\n");
                 close(sc);
@@ -475,7 +472,8 @@ int process_message(int *myop){
             break;
         case 3:
             /*modify_value()*/
-            err = recvMessage(sc, (char *) &msg_local.key, sizeof(int));  // envía la operacion
+            err = recvMessage(sc, (char *) &msg_local.key, sizeof(int32_t));  // envía la operacion
+            msg_local.key = ntohl(msg_local.key);
             if (err == -1){
                 printf("Error receiving\n");
                 close(sc);
@@ -483,12 +481,13 @@ int process_message(int *myop){
                 pthread_exit(0);
                 return -1;
             }
-            err = readLine(sc, (char *) msg_local.value1, MAX_LINE);  // envía la operacion
+            err = readLine(sc, (char *) msg_local.value1, MAX_LINE);
             if (err == -1){
                 printf("Error receiving\n");
                 return -1;
             }
-            err = recvMessage(sc, (char *) &msg_local.value2, sizeof(int));  // envía la operacion
+            err = recvMessage(sc, (char *) &msg_local.value2, sizeof(int32_t));  // envía la operacion
+            msg_local.key = ntohl(msg_local.key);
             if (err == -1){
                 printf("Error receiving\n");
                 close(sc);
@@ -496,7 +495,8 @@ int process_message(int *myop){
                 pthread_exit(0);
                 return -1;
             }
-            err = recvMessage(sc, (char *) &msg_local.value3, sizeof(float));  // envía la operacion
+            err = readLine(sc, (char *) myvalue3, 50);  // envía la operacion
+            msg_local.value3 = atof(myvalue3);
             if (err == -1){
                 printf("Error receiving\n");
                 close(sc);
@@ -635,7 +635,8 @@ int process_message(int *myop){
             break;
         case 4:
             /*delete_key()*/
-            err = recvMessage(sc, (char *) &msg_local.key, sizeof(int));  // envía la operacion
+            err = recvMessage(sc, (char *) &msg_local.key, sizeof(int32_t));
+            msg_local.key = ntohl(msg_local.key);
             if (err == -1){
                 printf("Error receiving\n");
                 close(sc);
@@ -736,7 +737,8 @@ int process_message(int *myop){
             break;
         case 5:
             /*exist()*/
-            err = recvMessage(sc, (char *) &msg_local.key, sizeof(int));  // envía la operacion
+            err = recvMessage(sc, (char *) &msg_local.key, sizeof(int32_t)); 
+            msg_local.key = ntohl(msg_local.key);
             if (err == -1){
                 printf("Error receiving\n");
                 close(sc);
@@ -761,15 +763,6 @@ int process_message(int *myop){
                 printf("mykey : %d\n", msg_local.key);
                 if (pthread_mutex_lock(&mymutex) != 0){
                     perror("Error mutex_lock\n");
-                    close(sc);
-                    closedir(msgdir);
-                    close(sd);
-                    pthread_exit(0);
-                    return -1;
-                }
-                if (atoi(msgcont->d_name) == 0){
-                    perror("Could not perform conversion\n");
-                    pthread_mutex_unlock(&mymutex);
                     close(sc);
                     closedir(msgdir);
                     close(sd);
@@ -1013,7 +1006,7 @@ int main(int argc, char *argv[]) {
 		}
 		printf("Accepted connection IP: %s   Port: %d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
-        err = recvMessage(sc, (char *) &op, sizeof(char));  // envía la operacion
+        err = recvMessage(sc, (char *) &op, sizeof(int));  // envía la operacion
         printf("Op: %d\n", op);
         if (err == -1){
             printf("Error receiving\n");

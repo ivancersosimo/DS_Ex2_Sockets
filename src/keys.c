@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <sys/types.h>
 
 #define MAXSIZE 256
 
@@ -165,7 +166,7 @@ int init(){
 
 
 
-int set_value(int key, char *value1, int value2, float value3){
+int set_value(int32_t key, char *value1, int32_t value2, float value3){
     /*--------Sockets------------*/
     int sd, err; 
     struct sockaddr_in server_addr;
@@ -205,7 +206,8 @@ int set_value(int key, char *value1, int value2, float value3){
         return -1;
     }
     printf("set value key: %d\n", key);
-    err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
+    key = htonl(key);
+    err = sendMessage(sd, (char *) &key, sizeof(int32_t));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
@@ -217,13 +219,16 @@ int set_value(int key, char *value1, int value2, float value3){
         close(sd);
         return -1;
     }
-    err = sendMessage(sd, (char *) &value2, sizeof(int));  // envía la operacion
+    value2 = htonl(value2);
+    err = sendMessage(sd, (char *) &value2, sizeof(int32_t));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
         return -1;
     }
-    err = sendMessage(sd, (char *) &value3, sizeof(float));  // envía la operacion
+    char myvalue3[50];
+    sprintf(myvalue3, "%f", value3);
+    err = sendMessage(sd, (char *) myvalue3, 50);  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
@@ -245,7 +250,7 @@ int set_value(int key, char *value1, int value2, float value3){
 }
 
 
-int get_value(int key, char *value1, int *value2, float *value3){
+int get_value(int32_t key, char *value1, int32_t *value2, float *value3){
     /*--------Sockets------------*/
     int sd, err; 
     struct sockaddr_in server_addr;
@@ -283,14 +288,15 @@ int get_value(int key, char *value1, int *value2, float *value3){
         close(sd);
         return -1;
     }
-    err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
+    key = htonl(key);
+    err = sendMessage(sd, (char *) &key, sizeof(int32_t));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
         return -1;
     }
 
-    err = recvMessage(sd, (char *) &res, sizeof(int));     // recibe la respuesta
+    err = recvMessage(sd, (char *) &res, sizeof(int));   // recibe la respuesta
     if (err == -1){
         printf("Error receiving\n");
         close(sd);
@@ -298,19 +304,24 @@ int get_value(int key, char *value1, int *value2, float *value3){
     }
     err = readLine(sd, (char *) value1, MAXSIZE);  // envía la operacion
     if (err == -1){
-        printf("Error sending\n");
+        printf("Error reding line\n");
         close(sd);
         return -1;
     }
-    err = recvMessage(sd, (char *) &value2, sizeof(int));  // envía la operacion
+    int32_t myvalue2;
+    err = recvMessage(sd, (char *) &myvalue2, sizeof(int32_t));  // envía la operacion
+    myvalue2 = ntohl(myvalue2);
+    *value2 = myvalue2;
     if (err == -1){
-        printf("Error sending\n");
+        printf("Error receiving\n");
         close(sd);
         return -1;
     }
-    err = recvMessage(sd, (char *) &value3, sizeof(float));  // envía la operacion
+    char myvalue3[50];
+    err = readLine(sd, (char *) myvalue3, 50);  // envía la operacion
+    *value3 = atof(myvalue3);
     if (err == -1){
-        printf("Error sending\n");
+        printf("Error receiving\n");
         close(sd);
         return -1;
     }
@@ -322,7 +333,7 @@ int get_value(int key, char *value1, int *value2, float *value3){
     return res;
 }
 
-int delete_key(int key){
+int delete_key(int32_t key){
     /*--------Sockets------------*/
     int sd, err; 
     struct sockaddr_in server_addr;
@@ -360,14 +371,15 @@ int delete_key(int key){
         close(sd);
         return -1;
     }
-    err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
+    key = htonl(key);
+    err = sendMessage(sd, (char *) &key, sizeof(int32_t));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
         return -1;
     }
 
-    err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
+    err = recvMessage(sd, (char *) &res, sizeof(int));     // recibe la respuesta
     if (err == -1){
         printf("Error receiving\n");
         close(sd);
@@ -381,7 +393,7 @@ int delete_key(int key){
     return res;
 }
 
-int modify_value(int key, char *value1, int value2, float value3){
+int modify_value(int32_t key, char *value1, int32_t value2, float value3){
    /*--------Sockets------------*/
     int sd, err; 
     struct sockaddr_in server_addr;
@@ -420,32 +432,36 @@ int modify_value(int key, char *value1, int value2, float value3){
         close(sd);
         return -1;
     }
-    err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
+    key = htonl(key);
+    err = sendMessage(sd, (char *) &key, sizeof(int32_t));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
         return -1;
     }
-    err = sendMessage(sd, (char *) value1, sizeof(char));  // envía la operacion
+    err = sendMessage(sd, (char *) value1, MAXSIZE);  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
         return -1;
     }
-    err = sendMessage(sd, (char *) &value2, sizeof(int));  // envía la operacion
+    value2 = htonl(value2);
+    err = sendMessage(sd, (char *) &value2, sizeof(int32_t));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
         return -1;
     }
-    err = sendMessage(sd, (char *) &value3, sizeof(float));  // envía la operacion
+    char myvalue3[50];
+    sprintf(myvalue3, "%f", value3);
+    err = sendMessage(sd, (char *) myvalue3, 50);  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
         return -1;
     }
 
-    err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
+    err = recvMessage(sd, (char *) &res, sizeof(int));     // recibe la respuesta
     if (err == -1){
         printf("Error receiving\n");
         close(sd);
@@ -460,7 +476,7 @@ int modify_value(int key, char *value1, int value2, float value3){
     return res;
 }
 
-int exist(int key){
+int exist(int32_t key){
     /*--------Sockets------------*/
     int sd, err; 
     struct sockaddr_in server_addr;
@@ -499,14 +515,15 @@ int exist(int key){
         close(sd);
         return -1;
     }
-    err = sendMessage(sd, (char *) &key, sizeof(int));  // envía la operacion
+    key = htonl(key);
+    err = sendMessage(sd, (char *) &key, sizeof(int32_t));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
         return -1;
     }
 
-    err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
+    err = recvMessage(sd, (char *) &res, sizeof(int));     // recibe la respuesta
     if (err == -1){
         printf("Error receiving\n");
         close(sd);
@@ -559,7 +576,7 @@ int num_items(){
         return -1;
     }
 
-    err = recvMessage(sd, (char *) &res, sizeof(int32_t));     // recibe la respuesta
+    err = recvMessage(sd, (char *) &res, sizeof(int));     // recibe la respuesta
     if (err == -1){
         printf("Error receiving\n");
         close(sd);
