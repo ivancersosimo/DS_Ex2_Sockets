@@ -117,6 +117,7 @@ int init(){
     struct hostent *hp;
     int op, res;
     sd = socket(AF_INET, SOCK_STREAM, 0);
+    
     if (sd == 1) {
         printf("Error in socket\n");
         return -1;
@@ -174,6 +175,8 @@ int set_value(int32_t key, char *value1, int32_t value2, float value3){
     int op, res;
     char *buff;
     sd = socket(AF_INET, SOCK_STREAM, 0);
+    char myvalue3[MAXSIZE];
+
     if (sd == 1) {
         printf("Error in socket\n");
         return -1;
@@ -215,22 +218,25 @@ int set_value(int32_t key, char *value1, int32_t value2, float value3){
     }
     err = sendMessage(sd, (char *) value1, MAXSIZE);  // envía la operacion
     if (err == -1){
-        printf("Error sending\n");
+        printf("Error sending value1\n");
         close(sd);
         return -1;
     }
     value2 = htonl(value2);
     err = sendMessage(sd, (char *) &value2, sizeof(int32_t));  // envía la operacion
     if (err == -1){
-        printf("Error sending\n");
+        printf("Error sending value2\n");
         close(sd);
         return -1;
     }
-    char myvalue3[50];
-    sprintf(myvalue3, "%f", value3);
-    err = sendMessage(sd, (char *) myvalue3, 50);  // envía la operacion
+    printf("value3 f: %f\n", value3);
+    int len = sprintf(myvalue3, "%f\n", value3);
+    sendMessage(sd, (char *) &len, sizeof(int));
+    
+    printf("myvalue3: %s\n", myvalue3);
+    err = sendMessage(sd, (char *) myvalue3, MAXSIZE);  // envía la operacion
     if (err == -1){
-        printf("Error sending\n");
+        printf("Error sending value3\n");
         close(sd);
         return -1;
     }
@@ -445,16 +451,19 @@ int modify_value(int32_t key, char *value1, int32_t value2, float value3){
         close(sd);
         return -1;
     }
+    printf("keys value2 before htonl: %d\n", value2);
     value2 = htonl(value2);
+    printf("keys value2 after htonl: %d\n", value2);
     err = sendMessage(sd, (char *) &value2, sizeof(int32_t));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
         return -1;
     }
-    char myvalue3[50];
+    char myvalue3[MAXSIZE];
     sprintf(myvalue3, "%f", value3);
-    err = sendMessage(sd, (char *) myvalue3, 50);  // envía la operacion
+    printf("value3 as a string %s:\n",myvalue3);
+    err = sendMessage(sd, (char *) myvalue3, MAXSIZE);  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);

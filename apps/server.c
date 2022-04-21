@@ -17,7 +17,6 @@
 #define MAX_LINE 256
 
 pthread_mutex_t mutex_msg, mymutex;
-bool message_not_copied = true;
 pthread_cond_t cond_msg;
 
 char msg_dir_name[] = "messages_dir";
@@ -27,35 +26,18 @@ int sd, sc;
 
 int process_message(int *myop){
     struct message_request msg_local;
-    
-    /*if (pthread_mutex_lock(&mutex_msg) != 0){
-        perror("Error mutex_lock\n");
-        return -1;
-    }
-    msg_local = *msg;
-    message_not_copied = false;
-    if (pthread_cond_signal(&cond_msg) != 0){
-        perror("Error cond_signal\n");
-        return -1;
-    }
-    if (pthread_mutex_unlock(&mutex_msg) != 0){
-        perror("Error mutex_unlock\n");
-        return -1;
-    }*/
 
     int err, sd;
     DIR *msgdir;
     struct dirent * msgcont;
     char file_name[100], file_to_delete_path[300];
-    char KeyString[20], v2str[20], v3str[20];
     char filecontent[sizeof(struct message_request)];
     int mymsg, myres, in_dir, file_cont, num_items;
     FILE *msg_mod;
-    char buff[sizeof(struct message_request)];
-    char to_read_value1[50], to_read_value2[50], to_read_value3[50];
-    char myvalue3[50];
+
     char mykey[50];
 
+    char myvalue3[MAXSIZE];
     printf("myop: %d\n", *myop);
     switch(*myop){
         case 0:
@@ -164,9 +146,12 @@ int process_message(int *myop){
                 pthread_exit(0);
                 return -1;
             }
-            err = readLine(sc, (char *) myvalue3, 50);  // envía la operacion
+            
+            err = readLine(sc, (char *) myvalue3, MAXSIZE);  // envía la operacion
+            printf("str msg_local.value3: %s ", myvalue3);
             msg_local.value3 = atof(myvalue3);
-            if (err == -1){
+            printf("float msg_local.value3: %f\n", msg_local.value3);
+             if (err == -1){
                 printf("Error receiving\n");
                 close(sc);
                 close(sd);
@@ -432,7 +417,17 @@ int process_message(int *myop){
                 }
             }
             
-            err = sendMessage(sd, (char *) msg_local.value1, MAX_LINE);  // envía la operacion
+            err = sendMessage(sc, (char *) &myres, sizeof(int32_t));  // envía la operacion
+            if (err == -1){
+                printf("Error sending res\n");
+                close(sc);
+                closedir(msgdir);
+                close(sd);
+                pthread_exit(0);
+                return -1;
+            }
+
+            err = sendMessage(sc, (char *) msg_local.value1, MAX_LINE);  // envía la operacion
             if (err == -1){
                 printf("Error sending 1\n");
                 close(sc);
@@ -493,7 +488,9 @@ int process_message(int *myop){
                 return -1;
             }
             err = recvMessage(sc, (char *) &msg_local.value2, sizeof(int32_t));  // envía la operacion
-            msg_local.key = ntohl(msg_local.key);
+            printf("Modify value2 before ntohl\n: %d", msg_local.value2);
+            msg_local.value2 = ntohl(msg_local.value2);
+            printf("Modify value2 after ntohl\n: %d", msg_local.value2);
             if (err == -1){
                 printf("Error receiving\n");
                 close(sc);
@@ -501,7 +498,7 @@ int process_message(int *myop){
                 pthread_exit(0);
                 return -1;
             }
-            err = readLine(sc, (char *) myvalue3, 50);  // envía la operacion
+            err = readLine(sc, (char *) myvalue3, MAX_LINE);  // envía la operacion
             msg_local.value3 = atof(myvalue3);
             if (err == -1){
                 printf("Error receiving\n");
@@ -523,6 +520,7 @@ int process_message(int *myop){
             while (((msgcont = readdir(msgdir)) != NULL) && in_dir == 1){
                 printf("Modify value, filename: %s ", msgcont->d_name);
                 printf("Modify value, filename: %d\n", atoi(msgcont->d_name));
+                printf("Modify while key:  %d\n", msg_local.key);
                 if (pthread_mutex_lock(&mymutex) != 0){
                     perror("Error mutex_lock\n");
                     close(sc);
@@ -531,8 +529,7 @@ int process_message(int *myop){
                     pthread_exit(0);
                     return -1;
                 }
-                sprintf(mykey, "%d", msg_local.key);
-                if (strcmp(msgcont->d_name, mykey) != 0){
+                if (atoi(msgcont->d_name) != msg_local.key){
                     in_dir = 1; //key doesn't exist
                     printf("key no exists, in_dir = %d\n", in_dir);
                     myres = -1;
@@ -665,15 +662,6 @@ int process_message(int *myop){
                     pthread_exit(0);
                     return -1;
                 }
-                if (atoi(msgcont->d_name)){
-                    perror("Could not perform conversion\n");
-                    pthread_mutex_unlock(&mymutex);
-                    close(sc);
-                    closedir(msgdir);
-                    close(sd);
-                    pthread_exit(0);
-                    return -1;
-                }
                 if (atoi(msgcont->d_name) != msg_local.key){
                     printf("key no exists, in_dir = %d\n", in_dir);
                     in_dir = 1;
@@ -682,7 +670,7 @@ int process_message(int *myop){
                 else {
                     in_dir = 0; //key exists
                     printf("key exists, in_dir = %d\n", in_dir);
-                    sprintf(file_to_delete_path, "%s/%d", msg_dir_name, *msgcont->d_name);
+                    sprintf(file_to_delete_path, "%s/%s", msg_dir_name, msgcont->d_name);
                     if (remove(file_to_delete_path) == -1){
                         perror("Error removign file\n");
                         pthread_mutex_unlock(&mymutex);
@@ -1021,21 +1009,6 @@ int main(int argc, char *argv[]) {
             return -1;
         }
         printf("Exit thread, do loop again\n");
-        /*if (pthread_mutex_lock(&mutex_msg) != 0){
-            perror("Error mutex_lock\n");
-            return -1;
-        }
-        while (message_not_copied){
-            if (pthread_cond_wait(&cond_msg, &mutex_msg) != 0){
-                perror("Error cond_wait\n");
-                return -1;
-            }
-        }
-        message_not_copied = true;
-        if (pthread_mutex_unlock(&mutex_msg) != 0){
-            perror("Error mutex_unlock\n");
-            return -1;
-        }*/
     }
     if(close(sd) == -1){
         perror("Error closing socket\n");

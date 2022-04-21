@@ -26,7 +26,9 @@ int main(int argc, char * argv[]) {
         key = atoi(argv[2]);
         value1 = argv[3];
         value2 = atoi(argv[4]);
+        printf("client Value2: %d\n", value2);
         value3 =  atof(argv[5]);
+        printf("client value3: %f\n", value3);
     }
     int error, res;
 
