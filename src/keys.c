@@ -598,3 +598,49 @@ int num_items(){
     }
     return res;
 }
+
+int exit_key(){
+    /*--------Sockets------------*/
+    int sd, err; 
+    struct sockaddr_in server_addr;
+    struct hostent *hp;
+    int op, res;
+    char *buff;
+    sd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sd == 1) {
+        printf("Error in socket\n");
+        return -1;
+    }
+    bzero( (char *) &server_addr, sizeof(server_addr));
+    hp = gethostbyname (getIP());
+    if (hp == NULL) {
+        printf("Error in gethostbyname\n");
+        close(sd);
+        return -1;
+    }
+    uint16_t myport = atoi(getPort());
+    memcpy (&(server_addr.sin_addr), hp->h_addr, hp->h_length);
+    server_addr.sin_family  = AF_INET;
+    server_addr.sin_port    = htons(myport);
+
+    err = connect(sd, (struct sockaddr *) &server_addr,  sizeof(server_addr));
+    if (err == -1) {
+        printf("Error in connect\n");
+        close(sd);
+        return -1;
+    }
+
+    op = 7;
+    err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
+    if (err == -1){
+        printf("Error sending\n");
+        close(sd);
+        return -1;
+    }
+
+    if(close (sd) == -1){
+        perror("Error closing socket\n");
+        return -1;
+    }
+    return 0;
+}
