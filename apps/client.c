@@ -10,6 +10,8 @@ void print_op_code(){
     printf("\t4    delete_key(key)\n");
     printf("\t5    exist(key)\n");
     printf("\t6    num_items()\n");
+    printf("\t7    exit_key()\n");
+
 }
 
 int main(int argc, char * argv[]) {
@@ -23,6 +25,7 @@ int main(int argc, char * argv[]) {
     char *value1;
     int32_t value2; 
     float value3;
+    int check_values = 1; //0->all good, 1->bad
     /*
     if(op > 0 && op != 2 && op != 6 && op != 5 && op != 4 && op < 7){
         key = atoi(argv[2]);
@@ -49,13 +52,26 @@ int main(int argc, char * argv[]) {
                 printf("init res: %d\n", res);
                 break;
             case 1:
+                char ss[MAXSIZE];
+                char * token;
                 printf("Client set value\n");
                 printf("<key> <value1> <value2> <value3>\n");
-                check = scanf("%d %s %d %f", &key, value1, &value2, &value3);
+                check = scanf("%s", ss);
+                token = strtok(ss, " ");
+                key = atoi(token);
+                token = strtok(NULL, " ");
+                strcpy(value1, token);
+                token = strtok(NULL, " ");
+                value2 = atoi(token);
+                token = strtok(NULL, " ");
+                key = atof(token);
+
                 while(check != 4){
+                    //key = 0; value1 ="\0"; value2 = 0; value3 = 0.0;
                     printf("Arguments data type is not valid\n");
                     printf("<key> <value1> <value2> <value3>\n");
-                    check = scanf("%d %s %d %f", &key, value1, &value2, &value3);
+                    check = scanf(" %d %s %d %f", &key, value1, &value2, &value3);
+                    
                 }
                 res = set_value(key, value1, value2, value3);
                 printf(" Set value res: %d\n", res);
