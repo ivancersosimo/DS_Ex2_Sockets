@@ -1,6 +1,7 @@
 #include "keys.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void print_op_code(){
     printf("\t0    init()\n");
@@ -19,23 +20,13 @@ int main(int argc, char * argv[]) {
         printf("IP_TUPLES=<ip> PORT_TUPLES=<port> ./client\n");
         return -1;
     }
-    //int op = atoi(argv[1]);
+    
     int op ;
     int32_t key;
     char *value1;
     int32_t value2; 
     float value3;
-    int check_values = 1; //0->all good, 1->bad
-    /*
-    if(op > 0 && op != 2 && op != 6 && op != 5 && op != 4 && op < 7){
-        key = atoi(argv[2]);
-        value1 = argv[3];
-        value2 = atoi(argv[4]);
-        printf("client Value2: %d\n", value2);
-        value3 =  atof(argv[5]);
-        printf("client value3: %f\n", value3);
-    }
-    */
+
     while(1){
         printf("Enter operation code: ");
         scanf("%d", &op);
@@ -45,34 +36,16 @@ int main(int argc, char * argv[]) {
         }
 
         int error, res, check;
-
+    
         switch (op){
             case 0:
                 res = init();
                 printf("init res: %d\n", res);
                 break;
             case 1:
-                char ss[MAXSIZE];
-                char * token;
                 printf("Client set value\n");
                 printf("<key> <value1> <value2> <value3>\n");
-                check = scanf("%s", ss);
-                token = strtok(ss, " ");
-                key = atoi(token);
-                token = strtok(NULL, " ");
-                strcpy(value1, token);
-                token = strtok(NULL, " ");
-                value2 = atoi(token);
-                token = strtok(NULL, " ");
-                key = atof(token);
-
-                while(check != 4){
-                    //key = 0; value1 ="\0"; value2 = 0; value3 = 0.0;
-                    printf("Arguments data type is not valid\n");
-                    printf("<key> <value1> <value2> <value3>\n");
-                    check = scanf(" %d %s %d %f", &key, value1, &value2, &value3);
-                    
-                }
+                check = scanf("%d %s %d %f", &key, value1, &value2, &value3);
                 res = set_value(key, value1, value2, value3);
                 printf(" Set value res: %d\n", res);
                 break;
@@ -80,11 +53,7 @@ int main(int argc, char * argv[]) {
                 printf("Client get value\n");
                 printf("<key>\n");
                 check = scanf("%d", &key);
-                while(check != 1){
-                    printf("Argument data type is not valid\n");
-                    printf("<key>\n");
-                    check = scanf("%d", &key);
-                }
+
                 int get_res = get_value(key, value1, &value2, &value3);
                 printf("Get value res: %d\n" ,get_res);
                 //get_value(key, value1, &value2, &value3);
@@ -94,11 +63,10 @@ int main(int argc, char * argv[]) {
             case 3:
                 printf("Client modify value\n");
                 printf("<key> <value1> <value2> <value3>\n");
+
                 check = scanf("%d %s %d %f", &key, value1, &value2, &value3);
-                while(check != 4){
-                    printf("Arguments data type is not valid\n");
-                    printf("<key> <value1> <value2> <value3>\n");
-                    check = scanf("%d %s %d %f", &key, value1, &value2, &value3);
+                if(check< 4){
+                    perror("wrong number of paremeters");
                 }
                 res = modify_value(key, value1, value2, value3);
                 printf("modify res: %d\n", res);
@@ -107,11 +75,7 @@ int main(int argc, char * argv[]) {
                 printf("CLient delete key\n"); 
                 printf("<key>\n");
                 check = scanf("%d", &key);
-                while(check != 1){
-                    printf("Argument data type is not valid\n");
-                    printf("<key>\n");
-                    check = scanf("%d", &key);
-                }
+
                 res = delete_key(key);
                 printf("delete res: %d\n", res);
                 break;
@@ -119,11 +83,7 @@ int main(int argc, char * argv[]) {
                 printf("Client exist\n");
                 printf("<key>\n");
                 check = scanf("%d", &key);
-                while(check != 1){
-                    printf("Argument data type is not valid\n");
-                    printf("<key>\n");
-                    check = scanf("%d", &key);
-                }
+
                 printf("key: %d\n", key);
                 res = exist(key);
                 printf("Exist:%d\n", res);

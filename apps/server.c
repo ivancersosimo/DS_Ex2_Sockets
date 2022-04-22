@@ -15,7 +15,7 @@
 #include <inttypes.h> /* strtoimax */
 
 #define MAX_LINE 256
-#define MAX_CLIENTS 5
+#define MAX_CLIENTS 10
 
 pthread_mutex_t mutex_msg, mymutex;
 bool message_not_copied = true;
@@ -60,14 +60,13 @@ int process_message(int * local_sc){
     char myvalue3[MAXSIZE];
 
     err = recvMessage(sc, (char *) &myop, sizeof(int));  // envía la operacion
-    printf("Op: %d\n", myop);
     if (err == -1){
         printf("Error receiving OP\n");
         close(sc);
         close(sd);
         return -1;
     }
-    printf("myop: %d\n", myop);
+    printf("Operation code resived: %d\n", myop);
     switch(myop){
         case 0:
             /*init()*/
@@ -81,13 +80,11 @@ int process_message(int * local_sc){
             }
             errno = 0;
             while ((msgcont = readdir(msgdir)) != NULL){
-                printf("*msgcont->d_name: %s\n", msgcont->d_name);
                 sprintf(file_to_delete_path, "%s/%s", msg_dir_name, msgcont->d_name);
                             
                 if (msgcont->d_type == DT_REG){
                     printf("%s\n",file_to_delete_path);
                     if (pthread_mutex_lock(&mymutex) != 0){
-                        
                         close(sc);
                         closedir(msgdir);
                         close(sd);
@@ -126,7 +123,7 @@ int process_message(int * local_sc){
             myres = 0;
             err = sendMessage(sc, (char *) &myres, sizeof(int));  // envía la operacion
             if (err == -1){
-                printf("Error sending\n");
+                perror("Error sending\n");
                 close(sc);
                 closedir(msgdir);
                 close(sd);
@@ -935,7 +932,6 @@ int main(int argc, char *argv[]) {
 
     uint16_t myport = atoi(argv[1]);
 
-    printf("my port: %s\n", argv[1]);
     if ((sd =  socket(AF_INET, SOCK_STREAM, 0))<0){
             printf ("SERVER: Error in socket");
             return (0);
@@ -947,8 +943,6 @@ int main(int argc, char *argv[]) {
     	server_addr.sin_family      = AF_INET;
     	server_addr.sin_addr.s_addr = INADDR_ANY;
     	server_addr.sin_port        = htons(myport);
-
-    printf("server_addr\n: %d", ntohs(server_addr.sin_port));
 
 
     err = bind(sd, (const struct sockaddr *)&server_addr, sizeof(server_addr));
@@ -1006,7 +1000,7 @@ int main(int argc, char *argv[]) {
                 close(sd);
                 return -1;
             }
-            printf("Accepted connection IP: %s   Port: %d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+            printf("Accepted connection IP: %s", inet_ntoa(client_addr.sin_addr));
             
             if (pthread_create(&threadId[num_clients], &t_attr, (void *)process_message, &mysc) != 0){
                 perror("Error creating thread\n");
