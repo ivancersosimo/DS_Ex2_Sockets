@@ -216,7 +216,7 @@ int set_value(int32_t key, char *value1, int32_t value2, float value3){
         close(sd);
         return -1;
     }
-    err = sendMessage(sd, (char *) value1, MAXSIZE);  // envía la operacion
+    err = sendMessage(sd, (char *) value1, strlen(value1)+1);  // envía la operacion
     if (err == -1){
         printf("Error sending value1\n");
         close(sd);
@@ -230,11 +230,10 @@ int set_value(int32_t key, char *value1, int32_t value2, float value3){
         return -1;
     }
     printf("value3 f: %f\n", value3);
-    int len = sprintf(myvalue3, "%f\n", value3);
-    sendMessage(sd, (char *) &len, sizeof(int));
+    sprintf(myvalue3, "%f\0", value3);
     
     printf("myvalue3: %s\n", myvalue3);
-    err = sendMessage(sd, (char *) myvalue3, MAXSIZE);  // envía la operacion
+    err = sendMessage(sd, (char *) myvalue3, strlen(myvalue3)+1);  // envía la operacion
     if (err == -1){
         printf("Error sending value3\n");
         close(sd);
