@@ -44,3 +44,25 @@ keys.h
 inttypes.h
 -
 
+/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/src/keys.c
+string.h
+-
+stdio.h
+-
+stdlib.h
+-
+errno.h
+-
+keys.h
+/home/ivan/Documents/Universidad linux/Distributed systems/Exercise2/DS_Ex2_Sockets/src/keys.h
+unistd.h
+-
+sys/socket.h
+-
+netdb.h
+-
+arpa/inet.h
+-
+sys/types.h
+-
+

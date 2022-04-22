@@ -90,7 +90,6 @@ int main(int argc, char * argv[]) {
             case 4:
                 printf("CLient delete key\n"); 
                 printf("<key>\n");
-                scanf("%d", &key);
                 check = scanf("%d", &key);
                 while(check != 1){
                     printf("Argument data type is not valid\n");

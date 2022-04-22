@@ -144,7 +144,7 @@ int init(){
     }
 
     op = 0;
-    err = sendMessage(sd, (char *) &op, sizeof(ino_t));  // envía la operacion
+    err = sendMessage(sd, (char *) &op, sizeof(int));  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
@@ -158,10 +158,10 @@ int init(){
         return -1;
     }
 
-    if(close (sd) == -1){
+  /*  if(close (sd) == -1){
         perror("Error closing socket\n");
         return -1;
-    }
+    }*/
     return res;
 }
 
@@ -230,7 +230,7 @@ int set_value(int32_t key, char *value1, int32_t value2, float value3){
         return -1;
     }
     printf("value3 f: %f\n", value3);
-    sprintf(myvalue3, "%f\0", value3);
+    sprintf(myvalue3, "%f\n", value3);
     
     printf("myvalue3: %s\n", myvalue3);
     err = sendMessage(sd, (char *) myvalue3, strlen(myvalue3)+1);  // envía la operacion
@@ -444,7 +444,7 @@ int modify_value(int32_t key, char *value1, int32_t value2, float value3){
         close(sd);
         return -1;
     }
-    err = sendMessage(sd, (char *) value1, MAXSIZE);  // envía la operacion
+    err = sendMessage(sd, (char *) value1, strlen(value1)+1);  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
@@ -462,7 +462,7 @@ int modify_value(int32_t key, char *value1, int32_t value2, float value3){
     char myvalue3[MAXSIZE];
     sprintf(myvalue3, "%f", value3);
     printf("value3 as a string %s:\n",myvalue3);
-    err = sendMessage(sd, (char *) myvalue3, MAXSIZE);  // envía la operacion
+    err = sendMessage(sd, (char *) myvalue3, strlen(myvalue3)+1);  // envía la operacion
     if (err == -1){
         printf("Error sending\n");
         close(sd);
